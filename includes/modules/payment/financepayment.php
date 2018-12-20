@@ -122,7 +122,7 @@ class financepayment {
         return;
     }
     $orderPaymanet = tep_db_fetch_array(tep_db_query(
-        'SELECT * FROM `'.DB_PREFIX.'finance_requests`
+        'SELECT * FROM `finance_requests`
         WHERE `order_id` = "'.(int)$oID.'"
         AND transaction_id != ""'
     ));
@@ -522,9 +522,9 @@ class financepayment {
       tep_redirect(tep_href_link(FILENAME_MODULES, 'set=payment&module=financepayment', 'NONSSL'));
       return 'failed';
     }
-    tep_db_query('CREATE TABLE IF NOT EXISTS `'.DB_PREFIX.'finance_product` (`id_finance_product` int(11) NOT NULL AUTO_INCREMENT, `products_id` int(11) NOT NULL, `display` text NOT NULL, `plans` text NOT NULL, PRIMARY KEY  (`id_finance_product`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8');
+    tep_db_query('CREATE TABLE IF NOT EXISTS `finance_product` (`id_finance_product` int(11) NOT NULL AUTO_INCREMENT, `products_id` int(11) NOT NULL, `display` text NOT NULL, `plans` text NOT NULL, PRIMARY KEY  (`id_finance_product`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8');
 
-    tep_db_query('CREATE TABLE IF NOT EXISTS `'.DB_PREFIX.'finance_requests` ( `id_finance_requests` int(11) NOT NULL AUTO_INCREMENT, `cart_id` int(11) NOT NULL, `hash` text NOT NULL, `total` text NOT NULL, `order_id` TEXT NOT NULL, `transaction_id` Text NOT NULL, PRIMARY KEY  (`id_finance_requests`) ) ENGINE= InnoDB DEFAULT CHARSET=utf8');
+    tep_db_query('CREATE TABLE IF NOT EXISTS `finance_requests` ( `id_finance_requests` int(11) NOT NULL AUTO_INCREMENT, `cart_id` int(11) NOT NULL, `hash` text NOT NULL, `total` text NOT NULL, `order_id` TEXT NOT NULL, `transaction_id` Text NOT NULL, PRIMARY KEY  (`id_finance_requests`) ) ENGINE= InnoDB DEFAULT CHARSET=utf8');
 
     tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sort order of display.', 'MODULE_PAYMENT_FINANCEPAYMENT_SORT_ORDER', '0', 'Sort order of displaying payment options to the customer. Lowest is displayed first.', '6', '0', now())");
     //payment status MODULE_PAYMENT_FINANCEPAYMENT_STATUS
@@ -619,10 +619,10 @@ class financepayment {
       for ($i=0, $n=sizeof($languages); $i<$n; $i++) {
         $language_id = $languages[$i]['id'];
 
-        $sql_data_array = array('orders_status_name' => tep_db_prepare_input($status));
+        $sql_data_array = array('orders_status_name' => tep_db_prepare_input($this->awaiting_status_name));
           if (empty($orders_status_id)) {
-            $next_id = tep_db_query("select max(orders_status_id)
-                                           as orders_status_id from " . TABLE_ORDERS_STATUS . "");
+            $next_id = tep_db_fetch_array(tep_db_query("select max(orders_status_id)
+                                           as orders_status_id from " . TABLE_ORDERS_STATUS . ""));
 
             $orders_status_id = $next_id['orders_status_id'] + 1;
           }
