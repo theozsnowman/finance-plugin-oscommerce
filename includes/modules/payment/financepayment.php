@@ -12,6 +12,7 @@
  * finance payment method class
  */
 require_once dirname(__FILE__) . '/financepayment/lib/divido/Divido.php';
+require_once DIR_FS_CATALOG. 'includes/languages/english/modules/payment/financepayment.php';
 class financepayment {
   /**
    * $code determines the internal 'code' name used to designate "this" payment module
@@ -37,13 +38,7 @@ class financepayment {
    * @var boolean
    */
   var $enabled;
-  /**
-   * log file folder
-   *
-   * @var string
-   */
-  var $_logDir = '';
-  /**
+    /**
    * vars
    */
   var $gateway_mode;
@@ -72,11 +67,6 @@ class financepayment {
     $this->description = MODULE_PAYMENT_FINANCEPAYMENT_TEXT_DESCRIPTION;
     $this->enabled = ((MODULE_PAYMENT_FINANCEPAYMENT_STATUS == 'True') ? true : false);
     $this->sort_order = MODULE_PAYMENT_FINANCEPAYMENT_SORT_ORDER;
-
-    if ((int)MODULE_PAYMENT_FINANCEPAYMENT_ORDER_STATUS_ID > 0) {
-      $this->order_status = MODULE_PAYMENT_FINANCEPAYMENT_ORDER_STATUS_ID;
-    }
-    $this->_logDir = defined('DIR_FS_LOGS') ? DIR_FS_LOGS : DIR_FS_SQL_CACHE;
     $this->awaiting_status_name = 'Awaiting Finance response';
     $this->checkApiKeyValidation();
     $this->all_plans_config_keys = array();
@@ -114,23 +104,27 @@ class financepayment {
       return false;
   }
 
-  function _doStatusUpdate($oID,$status,$comments,$customer_notified,$current_status)
+  function CheckFinanceActiveCall($oID)
   {
     global $messageStack;
-    $order = new Order((int)$oID);
-    if ($order->info['payment_module_code'] != $this->code) {
-        return;
-    }
-    $orderPaymanet = tep_db_fetch_array(tep_db_query(
-        'SELECT * FROM `finance_requests`
-        WHERE `order_id` = "'.(int)$oID.'"
+    if(MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL != 'True')
+      return false;
+    require(DIR_WS_CLASSES . 'order.php');
+    $order = new order((int)$oID);
+    $order_status = tep_db_fetch_array(tep_db_query(
+        'SELECT o.`orders_status`,o.`payment_method`,fr.`order_status_id`,fr.`transaction_id` FROM `orders` o
+        LEFT JOIN finance_requests fr ON(fr.`order_id` = '.$oID.')
+        WHERE o.`orders_id` = "'.(int)$oID.'"
         AND transaction_id != ""'
     ));
-    if ($status == MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS && !empty($orderPaymanet)) {
+    if ($order_status['payment_method'] != $this->title || $order_status['orders_status'] == $order_status['order_status_id']) {
+        return;
+    }
+    if ($order_status['orders_status'] == MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS && !empty($order_status)) {
 
         $request_data = array(
             'merchant' => MODULE_PAYMENT_FINANCEPAYMENT_APIKEY,
-            'application' => $orderPaymanet['transaction_id'],
+            'application' => $order_status['transaction_id'],
             'deliveryMethod' => $order->info['shipping_method'],
             'trackingNumber' => '1234',
         );
@@ -139,6 +133,8 @@ class financepayment {
         $response = Divido_Activation::activate($request_data);
 
         if (isset($response->status) && $response->status == 'ok') {
+            //update order status in finance_requests table
+            tep_db_query('UPDATE finance_requests SET `order_status_id` = "'.MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS.'" WHERE `order_id` = '.(int)$oID);
             return true;
         }
         if (isset($response->error)) {
@@ -146,6 +142,7 @@ class financepayment {
         } else {
           $messageStack->add_session(MODULE_PAYMENT_FINANCEPAYMENT_TEXT_ACTIVATION_CALL_ERROR, 'caution');
         }
+
     }
   }
 
@@ -524,7 +521,7 @@ class financepayment {
     }
     tep_db_query('CREATE TABLE IF NOT EXISTS `finance_product` (`id_finance_product` int(11) NOT NULL AUTO_INCREMENT, `products_id` int(11) NOT NULL, `display` text NOT NULL, `plans` text NOT NULL, PRIMARY KEY  (`id_finance_product`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8');
 
-    tep_db_query('CREATE TABLE IF NOT EXISTS `finance_requests` ( `id_finance_requests` int(11) NOT NULL AUTO_INCREMENT, `cart_id` int(11) NOT NULL, `hash` text NOT NULL, `total` text NOT NULL, `order_id` TEXT NOT NULL, `transaction_id` Text NOT NULL, PRIMARY KEY  (`id_finance_requests`) ) ENGINE= InnoDB DEFAULT CHARSET=utf8');
+    tep_db_query('CREATE TABLE IF NOT EXISTS `finance_requests` ( `id_finance_requests` int(11) NOT NULL AUTO_INCREMENT, `cart_id` int(11) NOT NULL, `hash` text NOT NULL, `total` text NOT NULL, `order_id` TEXT NOT NULL, `transaction_id` Text NOT NULL,`order_status_id` int(11) NOT NULL, PRIMARY KEY  (`id_finance_requests`) ) ENGINE= InnoDB DEFAULT CHARSET=utf8');
 
     tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sort order of display.', 'MODULE_PAYMENT_FINANCEPAYMENT_SORT_ORDER', '0', 'Sort order of displaying payment options to the customer. Lowest is displayed first.', '6', '0', now())");
     //payment status MODULE_PAYMENT_FINANCEPAYMENT_STATUS
@@ -542,7 +539,11 @@ class financepayment {
     $res = tep_db_fetch_array(tep_db_query('SELECT * FROM '.TABLE_CONFIGURATION.' WHERE configuration_key ="MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS"'));
     if(!empty($res))
       return false;
+    $awaiting_status_id = $this->awaitingStatusExists();
     tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) values ('Set Order Status', 'MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS', '2', 'Order status to make Finance Payment activation call', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
+
+    //Calculator MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL
+    tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Enable/Disable activation call functionality', 'MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL', 'False', 'Use Finance activation call functionality', '6', 'False', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
     
     //payment title MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE
     tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Finance Payment module\'s title', 'MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE', 'Finance module', 'The Title used for the Finance payment service', '6', '0', now())");
@@ -576,13 +577,13 @@ class financepayment {
     tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Product price minimum', 'MODULE_PAYMENT_FINANCEPAYMENT_MIN_PRODUCT', '0', 'Product price minimum', '6', '0', now())");
 
     //Accepted status MODULE_PAYMENT_FINANCEPAYMENT_ACCEPTED_STATUS
-    tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,  set_function, use_function, date_added) values ('ACCEPTED', 'MODULE_PAYMENT_FINANCEPAYMENT_ACCEPTED_STATUS', '1', 'Status for Accepted', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
+    tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,  set_function, use_function, date_added) values ('ACCEPTED', 'MODULE_PAYMENT_FINANCEPAYMENT_ACCEPTED_STATUS', '2', 'Status for Accepted', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
 
     //DEPOSITE-PAID status MODULE_PAYMENT_FINANCEPAYMENT_DEPOSIT-PAID_STATUS
-    tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,  set_function, use_function, date_added) values ('DEPOSIT-PAID', 'MODULE_PAYMENT_FINANCEPAYMENT_DEPOSIT-PAID_STATUS', '2', 'Status for Deposite-paid', '6', '0','tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
+    tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,  set_function, use_function, date_added) values ('DEPOSIT-PAID', 'MODULE_PAYMENT_FINANCEPAYMENT_DEPOSIT-PAID_STATUS', '".$awaiting_status_id."', 'Status for Deposite-paid', '6', '0','tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
 
     //SIGNED status MODULE_PAYMENT_FINANCEPAYMENT_SIGNED_STATUS
-    tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,  set_function, use_function, date_added) values ('SIGNED', 'MODULE_PAYMENT_FINANCEPAYMENT_SIGNED_STATUS', '2', 'Status for SIGNED', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
+    tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,  set_function, use_function, date_added) values ('SIGNED', 'MODULE_PAYMENT_FINANCEPAYMENT_SIGNED_STATUS', '4', 'Status for SIGNED', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
 
     //READY status MODULE_PAYMENT_FINANCEPAYMENT_READY_STATUS
     tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,  set_function, use_function, date_added) values ('READY', 'MODULE_PAYMENT_FINANCEPAYMENT_READY_STATUS', '2', 'Status for READY', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
@@ -624,10 +625,10 @@ class financepayment {
             $next_id = tep_db_fetch_array(tep_db_query("select max(orders_status_id)
                                            as orders_status_id from " . TABLE_ORDERS_STATUS . ""));
 
-            $orders_status_id = $next_id['orders_status_id'] + 1;
+            $awaiting_status_id = $next_id['orders_status_id'] + 1;
           }
 
-          $insert_sql_data = array('orders_status_id' => $orders_status_id,
+          $insert_sql_data = array('orders_status_id' => $awaiting_status_id,
                                    'language_id' => $language_id);
 
           $sql_data_array = array_merge($sql_data_array, $insert_sql_data);
@@ -636,7 +637,7 @@ class financepayment {
           //READY status MODULE_PAYMENT_FINANCEPAYMENT_READY_STATUS
       }
     }
-    tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,  set_function, use_function, date_added) values ('Awaiting status', 'MODULE_PAYMENT_FINANCEPAYMENT_AWAITING_STATUS', '".$orders_status_id."', 'Status for AWAITING', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
+    tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,  set_function, use_function, date_added) values ('Awaiting status', 'MODULE_PAYMENT_FINANCEPAYMENT_AWAITING_STATUS', '".$awaiting_status_id."', 'Status for AWAITING', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
   }
 
   function removeAwaitingStatus()
@@ -651,8 +652,8 @@ class financepayment {
   function removeOtherFields()
   {
     $this->removeAwaitingStatus();
-    $plans = (count($this->all_plans_config_keys) > 0) ? ','.implode(",", $this->all_plans_config_keys) : '';
-    tep_db_query("delete from " . TABLE_CONFIGURATION . " where configuration_key in ('MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_AWAITING_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE','MODULE_PAYMENT_FINANCEPAYMENT_WIDGET','MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR','MODULE_PAYMENT_FINANCEPAYMENT_PREFIX','MODULE_PAYMENT_FINANCEPAYMENT_SUFIX','MODULE_PAYMENT_FINANCEPAYMENT_WHOLE_CART', 'MODULE_PAYMENT_FINANCEPAYMENT_MIN_CART', 'MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_SELECTION','MODULE_PAYMENT_FINANCEPAYMENT_MIN_PRODUCT', 'MODULE_PAYMENT_FINANCEPAYMENT_ACCEPTED_STATUS', 'MODULE_PAYMENT_FINANCEPAYMENT_DEPOSIT-PAID_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_SIGNED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_READY_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_ACTION-LENDER_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_CANCELED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_COMPLETED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_DECLINED_STATUS', 'MODULE_PAYMENT_FINANCEPAYMENT_DEFERRED_STATUS', 'MODULE_PAYMENT_FINANCEPAYMENT_REFERRED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_FULFILLED_STATUS'".$plans.")");
+    tep_db_query("delete from " . TABLE_CONFIGURATION . " where configuration_key in ('MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_AWAITING_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE','MODULE_PAYMENT_FINANCEPAYMENT_WIDGET','MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR','MODULE_PAYMENT_FINANCEPAYMENT_PREFIX','MODULE_PAYMENT_FINANCEPAYMENT_SUFIX','MODULE_PAYMENT_FINANCEPAYMENT_WHOLE_CART', 'MODULE_PAYMENT_FINANCEPAYMENT_MIN_CART', 'MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_SELECTION','MODULE_PAYMENT_FINANCEPAYMENT_MIN_PRODUCT', 'MODULE_PAYMENT_FINANCEPAYMENT_ACCEPTED_STATUS', 'MODULE_PAYMENT_FINANCEPAYMENT_DEPOSIT-PAID_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_SIGNED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_READY_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_ACTION-LENDER_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_CANCELED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_COMPLETED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_DECLINED_STATUS', 'MODULE_PAYMENT_FINANCEPAYMENT_DEFERRED_STATUS', 'MODULE_PAYMENT_FINANCEPAYMENT_REFERRED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_FULFILLED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL')");
+    tep_db_query("DELETE FROM ".TABLE_CONFIGURATION." WHERE `configuration_key` LIKE '%MODULE_PAYMENT_FINANCEPAYMENT_PLAN%'");
   }
 
   /**
@@ -666,18 +667,19 @@ class financepayment {
 
   function updateOrderStatus($order_id,$new_order_status,$status_comment = null,$trans_id = null)
   {
-    if(!$order_id > 0 || $order_id == $new_order_status)
+    if(!$order_id > 0 || !$new_order_status > 0)
       return false;
     $sql_data_array = array('orders_id' => $order_id,
                                 'orders_status_id' => (int)$new_order_status,
                                 'date_added' => 'now()',
-                                'comments' => '',
+                                'comments' => $status_comment,
                                 'customer_notified' => 0
                              );
     tep_db_perform(TABLE_ORDERS_STATUS_HISTORY, $sql_data_array);
     tep_db_query("update " . TABLE_ORDERS  . "
                   set orders_status = '" . (int)$new_order_status . "'
                   where orders_id = '" . (int)$order_id . "'");
+    $this->CheckFinanceActiveCall($order_id);
     return true;
 
   }
@@ -688,7 +690,7 @@ class financepayment {
    */
   function keys() {
     $keys = array('MODULE_PAYMENT_FINANCEPAYMENT_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_APIKEY','MODULE_PAYMENT_FINANCEPAYMENT_SORT_ORDER');
-    $keys_1 = array('MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE','MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_WIDGET','MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR','MODULE_PAYMENT_FINANCEPAYMENT_PREFIX','MODULE_PAYMENT_FINANCEPAYMENT_SUFIX','MODULE_PAYMENT_FINANCEPAYMENT_WHOLE_CART','MODULE_PAYMENT_FINANCEPAYMENT_MIN_CART','MODULE_PAYMENT_FINANCEPAYMENT_MIN_PRODUCT','MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_SELECTION','MODULE_PAYMENT_FINANCEPAYMENT_AWAITING_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_ACCEPTED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_DEPOSIT-PAID_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_SIGNED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_READY_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_ACTION-LENDER_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_CANCELED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_COMPLETED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_DECLINED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_DEFERRED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_REFERRED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_FULFILLED_STATUS');
+    $keys_1 = array('MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE','MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL','MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_WIDGET','MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR','MODULE_PAYMENT_FINANCEPAYMENT_PREFIX','MODULE_PAYMENT_FINANCEPAYMENT_SUFIX','MODULE_PAYMENT_FINANCEPAYMENT_WHOLE_CART','MODULE_PAYMENT_FINANCEPAYMENT_MIN_CART','MODULE_PAYMENT_FINANCEPAYMENT_MIN_PRODUCT','MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_SELECTION','MODULE_PAYMENT_FINANCEPAYMENT_AWAITING_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_ACCEPTED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_DEPOSIT-PAID_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_SIGNED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_READY_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_ACTION-LENDER_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_CANCELED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_COMPLETED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_DECLINED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_DEFERRED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_REFERRED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_FULFILLED_STATUS');
     if(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY == '')
       return $keys;
     return array_merge($keys,$this->all_plans_config_keys,$keys_1);
@@ -702,7 +704,7 @@ public function getGlobalSelectedPlans()
     foreach ($all_plans as $plan) {
         if (in_array($plan->text, $this->status_arr)) {
             $key = array_search($plan->text,$this->status_arr);
-            if($this->getConfigValue(MODULE_PAYMENT_FINANCEPAYMENT_PLAN_.''.$key) == 'True') {
+            if($this->getConfigValue("MODULE_PAYMENT_FINANCEPAYMENT_PLAN_".$key) == 'True') {
               $plans[$plan->id] = $plan;
             }
         }
@@ -1043,7 +1045,8 @@ public static function getProductSettings($products_id)
   }
 
   function sendOrderEmails($order_id)
-  { global $order, $order_totals,$navigation,$cart,$payment;
+  { global $order, $order_totals,$navigation,$cart,$payment,$customer_id,$sendto,$billto;
+    global $$payment;
     // if the customer is not logged on, redirect them to the login page
     if (!tep_session_is_registered('customer_id')) {
       $navigation->set_snapshot(array('mode' => 'SSL', 'page' => FILENAME_CHECKOUT_PAYMENT));
@@ -1062,11 +1065,10 @@ public static function getProductSettings($products_id)
                     EMAIL_SEPARATOR . "\n" . 
                     $products_ordered . 
                     EMAIL_SEPARATOR . "\n";
-
+    if(is_array($order_totals) || is_object($order_totals))
     for ($i=0, $n=sizeof($order_totals); $i<$n; $i++) {
       $email_order .= strip_tags($order_totals[$i]['title']) . ' ' . strip_tags($order_totals[$i]['text']) . "\n";
     }
-    $customer_id = $_SESSION['customer_id'];
     if ($order->content_type != 'virtual') {
       $email_order .= "\n" . EMAIL_TEXT_DELIVERY_ADDRESS . "\n" . 
                       EMAIL_SEPARATOR . "\n" .

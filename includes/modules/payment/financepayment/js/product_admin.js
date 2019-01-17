@@ -1,8 +1,15 @@
 $(document).ready(function() {
     var base_url = window.location.origin,href = window.location.href,regex = new RegExp(/(categories.php)(?=.*action=new_product)(?=.*pID=([0-9]+))/g),mat = regex.exec(href);
+    var regex1 = new RegExp(/(orders.php)(?=.*action=edit)(?=.*oID=([0-9]+))/g),mat1 = regex1.exec(href);
     if(mat !== null && mat.length > 0 && mat[0] !== undefined) {
         if(mat[1] !== undefined && mat[2] !== undefined) { //welcome to backend product edit page
             attachAdminHtml(mat[2],base_url);
+        }
+    }
+    console.log(mat1);
+    if(mat1 !== null && mat1.length > 0 && mat1[0] !== undefined) {
+        if(mat1[1] !== undefined && mat1[2] !== undefined) { //welcome to backend order edit page
+            attachOrderStatusUpdateEvent(mat1[2],base_url);
         }
     }
     $(document).on("click","input[name=\'MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_FINANACE_PLANS\']",function() {
@@ -28,6 +35,23 @@ function attachAdminHtml(id,url)
         cache    : false,
         success: function(data) {
             $('form[name="new_product"] table').eq(2).append(data.html);
+        }
+    });
+}
+
+function attachOrderStatusUpdateEvent(order_id,url)
+{
+    $.ajax({
+        type     : 'post',
+        url      : url+'/finance_main_handler.php',
+        data     : {
+            action:'CheckFinanceActiveCall',
+            oID: order_id,
+        },
+        dataType : 'json',
+        cache    : false,
+        success: function(data) {
+            console.log('booom');
         }
     });
 }

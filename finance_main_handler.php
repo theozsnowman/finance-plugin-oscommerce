@@ -8,6 +8,7 @@
  */
 require('includes/application_top.php');
 require(DIR_WS_MODULES . 'payment/financepayment.php');
+require_once DIR_FS_CATALOG. 'includes/languages/english/modules/payment/financepayment.php';
 $finance = new financepayment();
 if(isset($_POST['action']) && $_POST['action'] == 'getCalculatorWidget' && $_POST['products_id'] > 0) {
     $price = $finance->get_product_price((int)$_POST['products_id']);
@@ -28,11 +29,15 @@ if(isset($_POST['action']) && $_POST['action'] == 'getCalculatorWidget' && $_POS
 if(isset($_POST['action']) && $_POST['action'] == 'getAdminProductForm' && $_POST['pID'] > 0) {
   die(json_encode(array('html' => $finance->getProductOptionsAdmin($_POST['pID']))));
 }
+if(isset($_POST['action']) && $_POST['action'] == 'CheckFinanceActiveCall' && $_POST['oID'] > 0) {
+  die(json_encode(array('html' => $finance->CheckFinanceActiveCall($_POST['oID']))));
+}
 if(isset($_POST['action']) && $_POST['action'] == 'updateProductPlans' && $_POST['pID'] > 0) {
   if($finance->updatePlans($_POST['pID'],$_POST['plans'])) {
     die(json_encode(array('message' => 'Successfully updated product plans!')));
   }
 }
+
 
 
 require_once(DIR_WS_CLASSES . 'order.php');
@@ -73,10 +78,10 @@ if (isset($_GET['type']) && $_GET['type'] == 'financepayment' && isset($_GET['re
   if($order_id && $status) {
     if ($current_order_state['orders_status_id'] != MODULE_PAYMENT_FINANCEPAYMENT_AWAITING_STATUS) {
         if ($status != $current_order_state['orders_status_id']) {
-            $finance->updateOrderStatus($order_id,$status);
+            $finance->updateOrderStatus($order_id,$status,'Finance Apllication Id: '.$result['transaction_id']);
         }
     } elseif ($status != $current_order_state['orders_status_id']) {
-        $finance->updateOrderStatus($order_id,$status);
+        $finance->updateOrderStatus($order_id,$status,'Finance Apllication Id: '.$result['transaction_id']);
     }
   }
 } elseif (isset($_GET['type']) && $_GET['type'] == 'financepayment' && isset($_GET['confirmation']) && isset($_GET['cartID']) !='') {

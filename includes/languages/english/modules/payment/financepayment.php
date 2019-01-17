@@ -25,9 +25,11 @@
   define('MODULE_PAYMENT_FINANCEPAYMENT_TEXT_DETAILS', 'Finance details ');
   define('MODULE_PAYMENT_FINANCEPAYMENT_TEXT_MODULE_DISABLED', 'This payment method is not active, Please try another payment method.');
   define('MODULE_PAYMENT_FINANCEPAYMENT_TEXT_PAYMENT_MISMATCH', 'Order amount mismatch error.');
-  // define('MODULE_PAYMENT_AUTHORIZENET_TEXT_JS_CC_OWNER', '* The owner\'s name of the credit card must be at least ' . CC_OWNER_MIN_LENGTH . ' characters.\n');
-  // define('MODULE_PAYMENT_AUTHORIZENET_TEXT_JS_CC_NUMBER', '* The credit card number must be at least ' . CC_NUMBER_MIN_LENGTH . ' characters.\n');
-  // define('MODULE_PAYMENT_AUTHORIZENET_TEXT_JS_CC_CVV', '* The 3 or 4 digit CVV number must be entered from the back of the credit card.\n');
-  // define('MODULE_PAYMENT_AUTHORIZENET_TEXT_ERROR_MESSAGE', 'There has been an error processing your credit card. Please try again.');
-  // define('MODULE_PAYMENT_AUTHORIZENET_TEXT_DECLINED_MESSAGE', 'Your credit card was declined. Please try another card or contact your bank for more info.');
-  // define('MODULE_PAYMENT_AUTHORIZENET_TEXT_ERROR', 'Credit Card Error!');
+  define('EMAIL_SEPARATOR', '------------------------------------------------------');
+  define('EMAIL_TEXT_ORDER_NUMBER', 'Order Number:');
+  define('EMAIL_TEXT_INVOICE_URL', 'Detailed Invoice:');
+  define('EMAIL_TEXT_DATE_ORDERED', 'Date Ordered:');
+  define('EMAIL_TEXT_PRODUCTS', 'Products');
+  define('EMAIL_TEXT_DELIVERY_ADDRESS', 'Delivery Address');
+  define('EMAIL_TEXT_BILLING_ADDRESS', 'Billing Address');
+  define('EMAIL_TEXT_SUBJECT', 'Payment confirmed by Finance payment');
