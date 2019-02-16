@@ -550,7 +550,7 @@ class financepayment {
 
     //Finance plan MODULE_PAYMENT_FINANCEPAYMENT_PLAN
     foreach ($plans as $key => $value) {
-      tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Finance plan', 'MODULE_PAYMENT_FINANCEPAYMENT_PLAN_".$key."', '', '".$value."', '6', '0','tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
+      tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Finance plan', 'MODULE_PAYMENT_FINANCEPAYMENT_PLAN_".$key."', 'False', '".$value."', '6', '0','tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
     }
 
     //Widget on product page MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_WIDGET
@@ -565,7 +565,7 @@ class financepayment {
     tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sufix', 'MODULE_PAYMENT_FINANCEPAYMENT_SUFIX', 'with', 'Sufix of the Finance payment module', '6', '0', now())");
 
     //Require whole cart MODULE_PAYMENT_FINANCEPAYMENT_WHOLE_CART
-    tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Require whole cart to be available on finance', 'MODULE_PAYMENT_FINANCEPAYMENT_WHOLE_CART', 'false', 'Require whole cart to be available on finance', '6', '0', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
+    tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Require whole cart to be available on finance', 'MODULE_PAYMENT_FINANCEPAYMENT_WHOLE_CART', 'False', 'Require whole cart to be available on finance', '6', '0', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
 
     //Minimum cart value MODULE_PAYMENT_FINANCEPAYMENT_MIN_CART
     tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Cart amount minimum', 'MODULE_PAYMENT_FINANCEPAYMENT_MIN_CART', '0', 'Cart amount minimum for the Finance payment module', '6', '0', now())");
@@ -690,7 +690,7 @@ class financepayment {
    */
   function keys() {
     $keys = array('MODULE_PAYMENT_FINANCEPAYMENT_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_APIKEY','MODULE_PAYMENT_FINANCEPAYMENT_SORT_ORDER');
-    $keys_1 = array('MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE','MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL','MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_WIDGET','MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR','MODULE_PAYMENT_FINANCEPAYMENT_PREFIX','MODULE_PAYMENT_FINANCEPAYMENT_SUFIX','MODULE_PAYMENT_FINANCEPAYMENT_WHOLE_CART','MODULE_PAYMENT_FINANCEPAYMENT_MIN_CART','MODULE_PAYMENT_FINANCEPAYMENT_MIN_PRODUCT','MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_SELECTION','MODULE_PAYMENT_FINANCEPAYMENT_AWAITING_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_ACCEPTED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_DEPOSIT-PAID_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_SIGNED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_READY_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_ACTION-LENDER_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_CANCELED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_COMPLETED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_DECLINED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_DEFERRED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_REFERRED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_FULFILLED_STATUS');
+    $keys_1 = array('MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE','MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL','MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_WIDGET','MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR','MODULE_PAYMENT_FINANCEPAYMENT_PREFIX','MODULE_PAYMENT_FINANCEPAYMENT_SUFIX','MODULE_PAYMENT_FINANCEPAYMENT_WHOLE_CART','MODULE_PAYMENT_FINANCEPAYMENT_MIN_CART','MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_SELECTION','MODULE_PAYMENT_FINANCEPAYMENT_MIN_PRODUCT','MODULE_PAYMENT_FINANCEPAYMENT_AWAITING_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_ACCEPTED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_DEPOSIT-PAID_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_SIGNED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_READY_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_ACTION-LENDER_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_CANCELED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_COMPLETED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_DECLINED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_DEFERRED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_REFERRED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_FULFILLED_STATUS');
     if(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY == '')
       return $keys;
     return array_merge($keys,$this->all_plans_config_keys,$keys_1);
@@ -782,6 +782,8 @@ public function getAllPlans()
 }
 public function getProductPlans($product_price, $products_id)
 {
+    if(!$this->enabled)
+        return array();
     $settings = $this->getProductSettings($products_id);
     $product_selection = MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_SELECTION;
     $price_threshold   = MODULE_PAYMENT_FINANCEPAYMENT_MIN_PRODUCT;
@@ -818,6 +820,8 @@ public function getProductPlans($product_price, $products_id)
   public function getCartPlans($order,$string = false)
   {
       $plans = array();
+      if(!$this->enabled)
+        return $plans;
       $s_plans = array();
       if($order->delivery != $order->billing)
         return $s_plans;
