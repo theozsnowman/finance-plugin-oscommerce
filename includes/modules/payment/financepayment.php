@@ -13,6 +13,8 @@
  */
 require_once dirname(__FILE__) . '/financepayment/lib/divido/Divido.php';
 require_once DIR_FS_CATALOG. 'includes/languages/english/modules/payment/financepayment.php';
+require_once DIR_FS_CATALOG. 'includes/modules/payment/merchant_sdk_controller.php';
+
 class financepayment {
   /**
    * $code determines the internal 'code' name used to designate "this" payment module
@@ -55,13 +57,17 @@ class financepayment {
    */
   private $gateway_currency;
 
-
+    /**
+     * @var string the currency enabled in this gateway's merchant account
+     */
+  private $merchantSDKController;
   /**
    * Constructor
    */
   function __construct() {
     global $order;
 
+    $this->merchantSDKController = new MerchantSDKController(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY );
     $this->code = 'financepayment';
     $this->title = MODULE_PAYMENT_FINANCEPAYMENT_TEXT_ADMIN_TITLE; // Payment module title in Admin
     $this->description = MODULE_PAYMENT_FINANCEPAYMENT_TEXT_DESCRIPTION;
@@ -753,14 +759,7 @@ public function getAllPlans()
         return array();
     }
 
-    Divido::setMerchant(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY);
-
-    $response = Divido_Finances::all();
-    if ($response->status != 'ok') {
-        return array();
-    }
-
-    $plans = $response->finances;
+    $plans = $this->merchantSDKController->getAllFinancePlans();
 
     $plans_plain = array();
     foreach ($plans as $plan) {
