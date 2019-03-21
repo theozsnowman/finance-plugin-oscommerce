@@ -8,6 +8,7 @@
  */
 require('includes/application_top.php');
 require(DIR_WS_MODULES . 'payment/financepayment.php');
+require(DIR_WS_MODULES . 'payment/FinanceApi.php');
 require_once DIR_FS_CATALOG. 'includes/languages/english/modules/payment/financepayment.php';
 $finance = new financepayment();
 if(isset($_POST['action']) && $_POST['action'] == 'getCalculatorWidget' && $_POST['products_id'] > 0) {
