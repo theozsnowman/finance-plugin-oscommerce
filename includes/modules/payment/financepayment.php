@@ -13,7 +13,10 @@
  */
 require_once dirname(__FILE__) . '/financepayment/lib/divido/Divido.php';
 require_once DIR_FS_CATALOG. 'includes/languages/english/modules/payment/financepayment.php';
-require_once DIR_FS_CATALOG. 'includes/modules/payment/merchant_sdk_controller.php';
+require_once __DIR__. '/financepayment/lib/divido/vendor/autoload.php';
+require_once __DIR__. '/FinanceApi.php';
+
+
 
 class financepayment {
   /**
@@ -58,31 +61,39 @@ class financepayment {
   private $gateway_currency;
 
     /**
-     * @var string the currency enabled in this gateway's merchant account
+     * @var FinanceApi class connecting to sdk
      */
-  private $merchantSDKController;
+    private $financeApi;
   /**
    * Constructor
    */
   function __construct() {
     global $order;
 
-    $this->merchantSDKController = new MerchantSDKController(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY );
+    $this->financeApi = new FinanceApi();
     $this->code = 'financepayment';
     $this->title = MODULE_PAYMENT_FINANCEPAYMENT_TEXT_ADMIN_TITLE; // Payment module title in Admin
     $this->description = MODULE_PAYMENT_FINANCEPAYMENT_TEXT_DESCRIPTION;
     $this->enabled = ((MODULE_PAYMENT_FINANCEPAYMENT_STATUS == 'True') ? true : false);
     $this->sort_order = MODULE_PAYMENT_FINANCEPAYMENT_SORT_ORDER;
     $this->awaiting_status_name = 'Awaiting Finance response';
-    $this->checkApiKeyValidation();
+
+    // only run api key validation check if it exists
+    if(!empty(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY )){
+        $this->checkApiKeyValidation();
+    }
+
     $this->all_plans_config_keys = array();
     if(is_array($this->status_arr))
     foreach ($this->status_arr as $key => $value) {
       $this->all_plans_config_keys[] = 'MODULE_PAYMENT_FINANCEPAYMENT_PLAN_'.$key;
     }
+
   }
 
+
   function checkApiKeyValidation() {
+
     $plans = $this->getAllPlans();
     $plans_s = 'array(';
     $status_arr = array();
@@ -112,6 +123,7 @@ class financepayment {
 
   function CheckFinanceActiveCall($oID)
   {
+      var_dump("change order id". $oID);
     global $messageStack;
     if(MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL != 'True')
       return false;
@@ -123,6 +135,7 @@ class financepayment {
         WHERE o.`orders_id` = "'.(int)$oID.'"
         AND transaction_id != ""'
     ));
+      var_dump($order_status);
     if ($order_status['payment_method'] != $this->title || $order_status['orders_status'] == $order_status['order_status_id']) {
         return;
     }
@@ -134,9 +147,13 @@ class financepayment {
             'deliveryMethod' => $order->info['shipping_method'],
             'trackingNumber' => '1234',
         );
+//        var_dump($request_data);
+//        var_dump($order);
         Divido::setMerchant(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY);
 
         $response = Divido_Activation::activate($request_data);
+        var_dump('ACTIVATE');
+        $this->activateApplicationWithSDK($order_status['transaction_id']);
 
         if (isset($response->status) && $response->status == 'ok') {
             //update order status in finance_requests table
@@ -350,8 +367,9 @@ class financepayment {
 
   function getConfirmation()
   {
+     // var_dump("get confirmation");
       global $order, $order_totals;
-      Divido::setApiKey(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY);
+
       $deposit = $_SESSION['finance_deposit'];
       $finance = $_SESSION['finance_plan'];
       $cart = $_SESSION['cart'];
@@ -359,44 +377,44 @@ class financepayment {
       $address = $order->billing;
       $country = $order->billing['country']['iso_code_2'];
 
-      $language = strtoupper($_SESSION['languages_code']);
+      $language = $_SESSION['languages_code'];
       $currency = $_SESSION['currency'];
 
       $cart_id = $_SESSION['cartID'];
 
-      $firstname = $customer['firstname'];
-      $lastname = $customer['lastname'];
+      $firstName = $customer['firstname'];
+      $lastName = $customer['lastname'];
       $email = $customer['email_address'];
       $telephone = $customer['telephone'];
-      $postcode  = $customer['postcode'];
+
 
       $products  = array();
       foreach ($order->products as $product) {
           $products[] = array(
-              'type' => 'product',
-              'text' => $product['name'],
+         //     'type' => 'product',
+              'name' => $product['name'],
               'quantity' => $product['qty'],
-              'value' => $product['final_price'],
+              'price'  => (int)$product['final_price'] * 100,
           );
       }
 
       $sub_total = $_SESSION['finance_total'];
 
-      $shiphandle = $order->info['shipping_cost'];
-      $disounts = $_SESSION['total_dicount'];
+      $shiphandle = (int)$order->info['shipping_cost'] * 100;
+      $disounts = -(int)$_SESSION['total_discount'] * 100;
+
 
       $products[] = array(
-          'type'     => 'product',
-          'text'     => 'Shipping & Handling',
+      //  'type'     => 'product',
+          'name'     => 'Shipping & Handling',
           'quantity' => 1,
-          'value'    => $shiphandle,
+          'price'    => $shiphandle,
       );
 
       $products[] = array(
-          'type'     => 'product',
-          'text'     => 'Discount',
+          'name'     => 'Discount',
           'quantity' => 1,
-          'value'    => "-".$disounts,
+          'price'    => $disounts,
       );
 
       $deposit_amount = tep_round(($deposit / 100) * $sub_total-$disounts, 2);
@@ -413,54 +431,63 @@ class financepayment {
 
       $request_data = array(
           'merchant' => MODULE_PAYMENT_FINANCEPAYMENT_APIKEY,
-          'deposit'  => $deposit_amount,
+          'deposit_amount'  => $deposit_amount,
+          'deposit_percentage' => ((float) $deposit)/100 ,
           'finance'  => $finance,
           'country'  => $country,
           'language' => $language,
           'currency' => $currency,
           'metadata' => array(
-              'cart_id' => $cart_id,
-              'cart_hash' => $hash,
-              'order_id' => $order_id,
+              'order_number' => $order_id,
           ),
           'customer' => array(
-              'title'         => '',
-              'first_name'    => $firstname,
-              'middle_name'   => '',
-              'last_name'     => $lastname,
-              'country'       => $country,
-              'postcode'      => $postcode,
+              'firstName'    => $firstName,
+              'lastName'     => $lastName,
               'email'         => $email,
-              'mobile_number' => '',
-              'phone_number'  => $telephone,
-              'address' => array(
-                  'text' => $address['street_address']." ".$address['suburb'].
-                      " ".$address['city']." ".$address['postcode'],
-              ),
+              'phoneNumber'  => $telephone,
           ),
           'products' => $products,
           'response_url' => htmlspecialchars_decode($response_url),
           'redirect_url' => htmlspecialchars_decode($redirect_url),
           'checkout_url' => htmlspecialchars_decode($checkout_url),
       );
-      $response = Divido_CreditRequest::create($request_data);
-      if ($response->status == 'ok') {
-        $_SESSION['order_id'] = $order_id;
-        $this->saveHash($cart_id,$hash,$sub_total,$order_id,$response->id);
-        unset($_SESSION['cartID']);
-        unset($_SESSION['cart']);
-          $data = array(
+
+      try{
+          $response = $this->financeApi->createAnApplication($request_data);
+          $_SESSION['order_id'] = $order_id;
+          $this->saveHash($cart_id,$hash,$sub_total,$order_id,$response['result_id']);
+          unset($_SESSION['cartID']);
+          unset($_SESSION['cart']);
+          return array(
               'status' => true,
-              'url'    => $response->url,
-          );
-          $this->transaction_id = $response->id;
-      } else {
-          $data = array(
-              'status'  => false,
-              'message' => $response->error,
+              'url'    => $response['redirect_url']
           );
       }
-      return $data;
+      catch(\Exception $e){
+          return  array(
+              'status'  => false,
+              'message' => $e->getMessage()
+          );
+      }
+//   // $response = Divido_CreditRequest::create($request_data);
+//      if ($response->status == 'ok') {
+//        $_SESSION['order_id'] = $order_id;
+//        $this->saveHash($cart_id,$hash,$sub_total,$order_id,$response->id);
+//        unset($_SESSION['cartID']);
+//        unset($_SESSION['cart']);
+//          $data = array(
+//              'status' => true,
+//              'url'    => $response->url,
+//          );
+//          $this->transaction_id = $response->id;
+//      } else {
+//          $data = array(
+//              'status'  => false,
+//              'message' => $response->error,
+//          );
+//      }
+//      return $data;
+//        return "";
   }
 
   public function saveHash($cart_id, $salt, $total,$order_id = '',$transaction_id = '')
@@ -673,6 +700,8 @@ class financepayment {
 
   function updateOrderStatus($order_id,$new_order_status,$status_comment = null,$trans_id = null)
   {
+      var_dump('change order');
+//     die();
     if(!$order_id > 0 || !$new_order_status > 0)
       return false;
     $sql_data_array = array('orders_id' => $order_id,
@@ -706,6 +735,7 @@ class financepayment {
 public function getGlobalSelectedPlans()
 {
     $all_plans = $this->getAllPlans();
+
     $plans = array();
     foreach ($all_plans as $plan) {
         if (in_array($plan->text, $this->status_arr)) {
@@ -759,13 +789,14 @@ public function getAllPlans()
         return array();
     }
 
-    $plans = $this->merchantSDKController->getAllFinancePlans();
+    $plans = $this->financeApi->getAllFinancePlansFromSDK();
 
     $plans_plain = array();
     foreach ($plans as $plan) {
         $plan_copy = new stdClass();
+
         $plan_copy->id                 = $plan->id;
-        $plan_copy->text               = $plan->text;
+        $plan_copy->text                = $plan->description;
         $plan_copy->country            = $plan->country;
         $plan_copy->min_amount         = $plan->min_amount;
         $plan_copy->min_deposit        = $plan->min_deposit;
@@ -1142,4 +1173,9 @@ public static function getProductSettings($products_id)
   public function hiddenField($value) {
     return '';
   }
+
+
+
+
+
 }
