@@ -23,10 +23,10 @@ class FinanceApi
         }
 
         // get environment from api key
-        $env = $this->environments( $apiKey);
+        $env = $this->environments( $apiKey );
 
         // create new client
-        $client            = new \GuzzleHttp\Client();
+        $client = new \GuzzleHttp\Client();
 
         // creat client wrapper
         $httpClientWrapper = new \Divido\MerchantSDK\HttpClient\HttpClientWrapper(
