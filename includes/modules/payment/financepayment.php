@@ -118,6 +118,7 @@ class financepayment {
 
   function CheckFinanceActiveCall($oID)
   {
+      var_dump("change order id". $oID);
     global $messageStack;
     if(MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL != 'True')
       return false;
@@ -129,6 +130,7 @@ class financepayment {
         WHERE o.`orders_id` = "'.(int)$oID.'"
         AND transaction_id != ""'
     ));
+      var_dump($order_status);
     if ($order_status['payment_method'] != $this->title || $order_status['orders_status'] == $order_status['order_status_id']) {
         return;
     }
@@ -140,24 +142,24 @@ class financepayment {
             'deliveryMethod' => $order->info['shipping_method'],
             'trackingNumber' => '1234',
         );
-        var_dump($request_data);
+//        var_dump($request_data);
 //        var_dump($order);
         Divido::setMerchant(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY);
 
-     //   $response = Divido_Activation::activate($request_data);
-  //      var_dump('ACTIVATE');
-       // $this->activateApplicationWithSDK($order_status['transaction_id']);
+        $response = Divido_Activation::activate($request_data);
+        var_dump('ACTIVATE');
+        $this->activateApplicationWithSDK($order_status['transaction_id']);
 
-//        if (isset($response->status) && $response->status == 'ok') {
-//            //update order status in finance_requests table
-//            tep_db_query('UPDATE finance_requests SET `order_status_id` = "'.MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS.'" WHERE `order_id` = '.(int)$oID);
-//            return true;
-//        }
-//        if (isset($response->error)) {
-//            $messageStack->add_session($response->error, 'caution');
-//        } else {
-//          $messageStack->add_session(MODULE_PAYMENT_FINANCEPAYMENT_TEXT_ACTIVATION_CALL_ERROR, 'caution');
-//        }
+        if (isset($response->status) && $response->status == 'ok') {
+            //update order status in finance_requests table
+            tep_db_query('UPDATE finance_requests SET `order_status_id` = "'.MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS.'" WHERE `order_id` = '.(int)$oID);
+            return true;
+        }
+        if (isset($response->error)) {
+            $messageStack->add_session($response->error, 'caution');
+        } else {
+          $messageStack->add_session(MODULE_PAYMENT_FINANCEPAYMENT_TEXT_ACTIVATION_CALL_ERROR, 'caution');
+        }
 
     }
   }
@@ -360,9 +362,9 @@ class financepayment {
 
   function getConfirmation()
   {
-      //var_dump("get confirmation");
+     // var_dump("get confirmation");
       global $order, $order_totals;
- //     Divido::setApiKey(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY);
+
       $deposit = $_SESSION['finance_deposit'];
       $finance = $_SESSION['finance_plan'];
       $cart = $_SESSION['cart'];
@@ -693,6 +695,8 @@ class financepayment {
 
   function updateOrderStatus($order_id,$new_order_status,$status_comment = null,$trans_id = null)
   {
+      var_dump('change order');
+//     die();
     if(!$order_id > 0 || !$new_order_status > 0)
       return false;
     $sql_data_array = array('orders_id' => $order_id,
