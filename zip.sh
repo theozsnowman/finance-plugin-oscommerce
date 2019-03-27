@@ -1,0 +1,1 @@
+zip -x \*.DS_Store \*.github \*.git README.md .idea composer.json composer.lock -r finance-gateway-m1.zip *
