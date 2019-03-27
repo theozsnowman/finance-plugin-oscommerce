@@ -13,8 +13,7 @@
  */
 require_once dirname(__FILE__) . '/financepayment/lib/divido/Divido.php';
 require_once DIR_FS_CATALOG. 'includes/languages/english/modules/payment/financepayment.php';
-
-require_once __DIR__. '../../../vendor/autoload.php';
+require_once __DIR__. '/../../../vendor/autoload.php';
 require_once __DIR__. '/FinanceApi.php';
 
 class financepayment {
