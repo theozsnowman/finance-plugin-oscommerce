@@ -107,9 +107,10 @@ class financepayment {
   function CheckFinanceActiveCall($oID)
   {
     global $messageStack;
-    if(MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL != 'True')
+    if(MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL != 'True'){
       return false;
-    require(DIR_WS_CLASSES . 'order.php');
+    }
+    //require(DIR_WS_CLASSES . 'order.php');
     $order = new order((int)$oID);
     $order_status = tep_db_fetch_array(tep_db_query(
         'SELECT o.`orders_status`,o.`payment_method`,fr.`order_status_id`,fr.`transaction_id` FROM `orders` o
@@ -679,6 +680,7 @@ class financepayment {
     tep_db_query("update " . TABLE_ORDERS  . "
                   set orders_status = '" . (int)$new_order_status . "'
                   where orders_id = '" . (int)$order_id . "'");
+
     $this->CheckFinanceActiveCall($order_id);
     return true;
 
