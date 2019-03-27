@@ -14,6 +14,7 @@ class FinanceApi
      */
     public function getAllFinancePlansFromSDK(){
 
+        // set api key variable
         if(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY === "MODULE_PAYMENT_FINANCEPAYMENT_APIKEY"){
             $apiKey = '';
         }
@@ -21,16 +22,22 @@ class FinanceApi
             $apiKey = MODULE_PAYMENT_FINANCEPAYMENT_APIKEY;
         }
 
-        $env = \Divido\MerchantSDK\Environment::SANDBOX;
-        $client            = new \GuzzleHttp\Client();
+        // get environment from api key
+        $env = $this->environments( $apiKey );
 
+        // create new client
+        $client = new \GuzzleHttp\Client();
+
+        // creat client wrapper
         $httpClientWrapper = new \Divido\MerchantSDK\HttpClient\HttpClientWrapper(
             new \Divido\MerchantSDKGuzzle6\GuzzleAdapter($client),
             \Divido\MerchantSDK\Environment::CONFIGURATION[$env]['base_uri'],
             $apiKey
         );
 
+        // create ner sdk
         $this->_sdk = new \Divido\MerchantSDK\Client( $httpClientWrapper, $env);
+
         // Set any request options.
         $requestOptions = (new \Divido\MerchantSDK\Handlers\ApiRequestOptions());
 
@@ -117,6 +124,35 @@ class FinanceApi
     public function check(){
         return true;
     }
+
+    /**
+     * Define environment function
+     *
+     *  @param [string] $key   - The Divido API key.
+     */
+    function environments( $key ) {
+        $array       = explode( '_', $key );
+        $environment = strtoupper( $array[0] );
+        switch ($environment) {
+            case 'LIVE':
+                return constant( 'Divido\MerchantSDK\Environment::' . $environment );
+                break;
+
+            case 'SANDBOX':
+                return constant( "Divido\MerchantSDK\Environment::$environment" );
+                break;
+
+            default:
+                return constant( "Divido\MerchantSDK\Environment::SANDBOX" );
+                break;
+        }
+
+    }
+
+    function keys(){
+
+    }
+
 
 
 
