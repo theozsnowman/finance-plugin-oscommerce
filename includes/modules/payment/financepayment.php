@@ -68,7 +68,12 @@ class financepayment {
     $this->enabled = ((MODULE_PAYMENT_FINANCEPAYMENT_STATUS == 'True') ? true : false);
     $this->sort_order = MODULE_PAYMENT_FINANCEPAYMENT_SORT_ORDER;
     $this->awaiting_status_name = 'Awaiting Finance response';
-    $this->checkApiKeyValidation();
+
+    // only run api key validation check if it exists
+    if(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY != "MODULE_PAYMENT_FINANCEPAYMENT_APIKEY"){
+        $this->checkApiKeyValidation();
+    }
+
     $this->all_plans_config_keys = array();
     if(is_array($this->status_arr))
     foreach ($this->status_arr as $key => $value) {
