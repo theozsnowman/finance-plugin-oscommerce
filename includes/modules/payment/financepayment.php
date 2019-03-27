@@ -79,7 +79,7 @@ class financepayment {
     $this->awaiting_status_name = 'Awaiting Finance response';
 
     // only run api key validation check if it exists
-    if(!empty(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY )){
+    if(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY != "MODULE_PAYMENT_FINANCEPAYMENT_APIKEY"){
         $this->checkApiKeyValidation();
     }
 
