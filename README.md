@@ -1,4 +1,4 @@
- --------------------------------
+
 Zipping up finance payment module 
 ---------------------------------
 
@@ -7,7 +7,7 @@ Zipping up finance payment module
 2. Run `bash zip.sh`
 
 
- -------------------------------------
+
 Installation of finance payment module    
 --------------------------------------
 
