@@ -2,7 +2,7 @@
 Zipping up finance payment module 
 ---------------------------------
 
-1. Run `composer install`
+1. In finance-plugin-oscommerce root directory run `composer install`
 
 2. Run `bash zip.sh`
 
