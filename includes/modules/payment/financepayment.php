@@ -123,7 +123,8 @@ class financepayment {
 
   function CheckFinanceActiveCall($oID)
   {
-      var_dump("change order id". $oID);
+
+      error_log("change order id". $oID);
     global $messageStack;
     if(MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL != 'True')
       return false;
@@ -135,7 +136,7 @@ class financepayment {
         WHERE o.`orders_id` = "'.(int)$oID.'"
         AND transaction_id != ""'
     ));
-      var_dump($order_status);
+      error_log($order_status);
     if ($order_status['payment_method'] != $this->title || $order_status['orders_status'] == $order_status['order_status_id']) {
         return;
     }
@@ -152,7 +153,7 @@ class financepayment {
         Divido::setMerchant(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY);
 
         $response = Divido_Activation::activate($request_data);
-        var_dump('ACTIVATE');
+        error_log('ACTIVATE');
         $this->activateApplicationWithSDK($order_status['transaction_id']);
 
         if (isset($response->status) && $response->status == 'ok') {
@@ -700,7 +701,7 @@ class financepayment {
 
   function updateOrderStatus($order_id,$new_order_status,$status_comment = null,$trans_id = null)
   {
-      var_dump('change order');
+      error_log('change order');
 //     die();
     if(!$order_id > 0 || !$new_order_status > 0)
       return false;
