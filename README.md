@@ -2,7 +2,7 @@
 Installation of finance payment module    
 --------------------------------------
 
-1. Move zip file to the "catalog" directory of oscommerce site on client server
+1. Move `finance-gateway-oscommerce.zip` to the "catalog" directory of oscommerce site on client server
 
 2. ssh into client server and navigate to the "catalog" directory of oscommerce site
 
