@@ -11,13 +11,11 @@ Zipping up finance payment module
 Installation of finance payment module    
 --------------------------------------
 
-1. Move zip file to root directory of oscommerce site on client server
+1. Move zip file to the "catalog" directory of oscommerce site on client server
 
-2. ssh into client server and navigate to root directory of oscommerce site
+2. ssh into client server and navigate to the "catalog" directory of oscommerce site
 
 3. Run `unzip finance-gateway-m1.zip`
-
-4. Run `bash unpack.sh`
 
 5. Login into your admin page. While viewing the payment modules in admin you will see the "Finance Payment" module in the list. Click the **[Install]** button.
 
