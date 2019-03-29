@@ -107,7 +107,7 @@ class FinanceApi
             ->withTrackingNumber($request['tracking_number']);
 
         // Create a new activation for the application.
-        $response = $this->_sdk->application_activations()->createApplicationActivation($application, $applicationActivation);
+        $response = $this->_sdk->applicationActivations()->createApplicationActivation($application, $applicationActivation);
 
 
         return $response->getBody()->getContents();
