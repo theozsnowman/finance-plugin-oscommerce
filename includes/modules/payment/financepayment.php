@@ -577,7 +577,7 @@ class financepayment {
         if(!empty($res))
             return false;
         $awaiting_status_id = $this->awaitingStatusExists();
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) values ('Set Order Status', 'MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS', '2', 'Order status to make Finance Payment activation call', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) values ('Set Order Status', 'MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATED_STATUS', '2', 'Order status to make Finance Payment activation call', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
 
         //Calculator MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Enable/Disable activation call functionality', 'MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL', 'False', 'Use Finance activation call functionality', '6', 'False', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
@@ -629,7 +629,7 @@ class financepayment {
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,  set_function, use_function, date_added) values ('ACTION-LENDER', 'MODULE_PAYMENT_FINANCEPAYMENT_ACTION-LENDER_STATUS', '2', 'Status for ACTION-LENDER', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
 
         //CANCELED status MODULE_PAYMENT_FINANCEPAYMENT_CANCELED_STATUS
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,  set_function, use_function, date_added) values ('CANCELED', 'MODULE_PAYMENT_FINANCEPAYMENT_CANCELED_STATUS', '1', 'Status for CANCELED', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,  set_function, use_function, date_added) values ('CANCELED', 'MODULE_PAYMENT_FINANCEPAYMENT_CANCELLED_STATUS', '1', 'Status for CANCELED', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
 
         //COMPLETED status MODULE_PAYMENT_FINANCEPAYMENT_COMPLETED_STATUS
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,  set_function, use_function,date_added) values ('COMPLETED', 'MODULE_PAYMENT_FINANCEPAYMENT_COMPLETED_STATUS', '2', 'Status for COMPLETED', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
