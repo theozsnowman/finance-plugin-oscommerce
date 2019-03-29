@@ -178,7 +178,6 @@ class financepayment {
         $plans_str = array();
         foreach ($plans as $key => $value) {
             $plans_str[] = $this->status_arr[$value];
-
         }
         $plans = implode(',', $plans_str);
         $result = tep_db_query("select * from `finance_product` where products_id = '".(int)$id."'");

@@ -64,6 +64,7 @@ class financepayment {
      * @var FinanceApi class connecting to sdk
      */
     private $financeApi;
+<<<<<<< HEAD
     /**
      * Constructor
      */
@@ -82,6 +83,26 @@ class financepayment {
         if(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY != "MODULE_PAYMENT_FINANCEPAYMENT_APIKEY" && !empty(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY) ){
             $this->checkApiKeyValidation();
         }
+=======
+  /**
+   * Constructor
+   */
+  function __construct() {
+    global $order;
+
+    $this->financeApi = new FinanceApi();
+    $this->code = 'financepayment';
+    $this->title = MODULE_PAYMENT_FINANCEPAYMENT_TEXT_ADMIN_TITLE; // Payment module title in Admin
+    $this->description = MODULE_PAYMENT_FINANCEPAYMENT_TEXT_DESCRIPTION;
+    $this->enabled = ((MODULE_PAYMENT_FINANCEPAYMENT_STATUS == 'True') ? true : false);
+    $this->sort_order = MODULE_PAYMENT_FINANCEPAYMENT_SORT_ORDER;
+    $this->awaiting_status_name = 'Awaiting Finance response';
+
+    // only run api key validation check if it exists
+    if(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY != "MODULE_PAYMENT_FINANCEPAYMENT_APIKEY" && !empty(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY) ){
+        $this->checkApiKeyValidation();
+    }
+>>>>>>> master
 
         $this->all_plans_config_keys = array();
         if(is_array($this->status_arr))
@@ -120,6 +141,7 @@ class financepayment {
         else
             return false;
     }
+<<<<<<< HEAD
 
     function CheckFinanceActiveCall($oID)
     {
@@ -170,15 +192,66 @@ class financepayment {
 //        }
 
         }
+=======
+  }
+
+  function awaitingStatusExists()
+  { 
+    $res = tep_db_fetch_array(tep_db_query("SELECT orders_status_id FROM ".TABLE_ORDERS_STATUS." WHERE orders_status_name ='".$this->awaiting_status_name."'"));
+    if(isset($res['orders_status_id']) && $res['orders_status_id'] > 0)
+      return $res['orders_status_id'];
+    else
+      return false;
+  }
+
+  function CheckFinanceActiveCall($oID)
+  {
+
+      error_log("change order id". $oID);
+    global $messageStack;
+    if(MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL != 'True')
+      return false;
+    require(DIR_WS_CLASSES . 'order.php');
+    $order = new order((int)$oID);
+    $order_status = tep_db_fetch_array(tep_db_query(
+        'SELECT o.`orders_status`,o.`payment_method`,fr.`order_status_id`,fr.`transaction_id` FROM `orders` o
+        LEFT JOIN finance_requests fr ON(fr.`order_id` = '.$oID.')
+        WHERE o.`orders_id` = "'.(int)$oID.'"
+        AND transaction_id != ""'
+    ));
+      error_log($order_status);
+    if ($order_status['payment_method'] != $this->title || $order_status['orders_status'] == $order_status['order_status_id']) {
+        return;
+>>>>>>> master
     }
 
+<<<<<<< HEAD
     function updatePlans($id,$plans)
     {
         $plans = explode(',', $plans);
         $plans_str = array();
         foreach ($plans as $key => $value) {
             $plans_str[] = $this->status_arr[$value];
+=======
+        $request_data = array(
+            'merchant' => MODULE_PAYMENT_FINANCEPAYMENT_APIKEY,
+            'application' => $order_status['transaction_id'],
+            'deliveryMethod' => $order->info['shipping_method'],
+            'trackingNumber' => '1234',
+        );
+//        var_dump($request_data);
+//        var_dump($order);
+        Divido::setMerchant(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY);
 
+        $response = Divido_Activation::activate($request_data);
+        error_log('ACTIVATE');
+        $this->activateApplicationWithSDK($order_status['transaction_id']);
+
+        if (isset($response->status) && $response->status == 'ok') {
+            //update order status in finance_requests table
+            tep_db_query('UPDATE finance_requests SET `order_status_id` = "'.MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS.'" WHERE `order_id` = '.(int)$oID);
+            return true;
+>>>>>>> master
         }
         $plans = implode(',', $plans_str);
         $result = tep_db_query("select * from `finance_product` where products_id = '".(int)$id."'");
@@ -682,6 +755,7 @@ class financepayment {
     {
         tep_db_query("delete from " . TABLE_ORDERS_STATUS . "
                       where orders_status_id = '" . tep_db_input($this->awaiting_status_name) . "'");
+<<<<<<< HEAD
     }
     /**
      * Remove the module and all its settings
@@ -706,6 +780,32 @@ class financepayment {
     function updateOrderStatus($order_id,$new_order_status,$status_comment = null,$trans_id = null)
     {
         error_log('change order');
+=======
+  }
+  /**
+   * Remove the module and all its settings
+   *
+   */
+  function removeOtherFields()
+  {
+    $this->removeAwaitingStatus();
+    tep_db_query("delete from " . TABLE_CONFIGURATION . " where configuration_key in ('MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATION_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_AWAITING_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE','MODULE_PAYMENT_FINANCEPAYMENT_WIDGET','MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR','MODULE_PAYMENT_FINANCEPAYMENT_PREFIX','MODULE_PAYMENT_FINANCEPAYMENT_SUFIX','MODULE_PAYMENT_FINANCEPAYMENT_WHOLE_CART', 'MODULE_PAYMENT_FINANCEPAYMENT_MIN_CART', 'MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_SELECTION','MODULE_PAYMENT_FINANCEPAYMENT_MIN_PRODUCT', 'MODULE_PAYMENT_FINANCEPAYMENT_ACCEPTED_STATUS', 'MODULE_PAYMENT_FINANCEPAYMENT_DEPOSIT-PAID_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_SIGNED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_READY_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_ACTION-LENDER_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_CANCELED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_COMPLETED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_DECLINED_STATUS', 'MODULE_PAYMENT_FINANCEPAYMENT_DEFERRED_STATUS', 'MODULE_PAYMENT_FINANCEPAYMENT_REFERRED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_FULFILLED_STATUS','MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL')");
+    tep_db_query("DELETE FROM ".TABLE_CONFIGURATION." WHERE `configuration_key` LIKE '%MODULE_PAYMENT_FINANCEPAYMENT_PLAN%'");
+  }
+
+  /**
+   * Remove the module and all its settings
+   *
+   */
+  function remove() {
+    $this->removeAwaitingStatus();
+    tep_db_query("delete from " . TABLE_CONFIGURATION . " where configuration_key in ('" . implode("', '", $this->keys()) . "')");
+  }
+
+  function updateOrderStatus($order_id,$new_order_status,$status_comment = null,$trans_id = null)
+  {
+      error_log('change order');
+>>>>>>> master
 //     die();
         if(!$order_id > 0 || !$new_order_status > 0)
             return false;

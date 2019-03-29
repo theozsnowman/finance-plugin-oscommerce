@@ -1,14 +1,18 @@
- -----------------
-Installation Notes      
-------------------
 
-1. Copy the includes folder and the financepayment_main_handler.php to your Oscommerce folder. This contains all the required module files, Do not overwrite any original files while copying.
+Installation of finance payment module    
+--------------------------------------
 
-2. Login into your admin page. While viewing the payment modules in admin you will see the "Finance Payment" module in the list. Click the **[Install]** button.
+1. Move `finance-gateway-oscommerce.zip` to the "catalog" directory of oscommerce site on client server
 
-3. You can set the configuration of this module in the Modules => Payment => Finance Payment.
+2. ssh into client server and navigate to the "catalog" directory of oscommerce site
 
-4.To add options of finance plans for each product page, You have to edit few files.
+3. Run `unzip finance-gateway-oscommerce.zip`
+
+5. Login into your admin page. While viewing the payment modules in admin you will see the "Finance Payment" module in the list. Click the **[Install]** button.
+
+6. You can set the configuration of this module in the Modules => Payment => Finance Payment.
+
+7.To add options of finance plans for each product page, You have to edit few files.
    a) You need to open the application_bottom.php under your admin folder and then /includes/application_bottom.php and add the below code at the bottom of the file.
    
  ```  

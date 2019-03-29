@@ -8,7 +8,6 @@
  */
 require('includes/application_top.php');
 require(DIR_WS_MODULES . 'payment/financepayment.php');
-//require(DIR_WS_MODULES . 'payment/FinanceApi.php');
 require_once DIR_FS_CATALOG. 'includes/languages/english/modules/payment/financepayment.php';
 $finance = new financepayment();
 if(isset($_POST['action']) && $_POST['action'] == 'getCalculatorWidget' && $_POST['products_id'] > 0) {
@@ -79,10 +78,10 @@ if (isset($_GET['type']) && $_GET['type'] == 'financepayment' && isset($_GET['re
   if($order_id && $status) {
     if ($current_order_state['orders_status_id'] != MODULE_PAYMENT_FINANCEPAYMENT_AWAITING_STATUS) {
         if ($status != $current_order_state['orders_status_id']) {
-            $finance->updateOrderStatus($order_id,$status,'Finance Apllication Id: '.$result['transaction_id']);
+            $finance->updateOrderStatus($order_id,$status,'Finance Application Id: '.$result['transaction_id']);
         }
     } elseif ($status != $current_order_state['orders_status_id']) {
-        $finance->updateOrderStatus($order_id,$status,'Finance Apllication Id: '.$result['transaction_id']);
+        $finance->updateOrderStatus($order_id,$status,'Finance Application Id: '.$result['transaction_id']);
     }
   }
 } elseif (isset($_GET['type']) && $_GET['type'] == 'financepayment' && isset($_GET['confirmation']) && isset($_GET['cartID']) !='') {
