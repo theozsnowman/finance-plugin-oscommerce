@@ -91,28 +91,20 @@ class FinanceApi
     /**
      * activate application
      */
-    public function activateApplicationWithSDK($applicationId, $items ){
+    public function activateApplicationWithSDK( $request ){
 
         // First get the application you wish to create an activation for.
         $application = (new \Divido\MerchantSDK\Models\Application())
-            ->withId($applicationId);
-
-//        $items = [
-//            [
-//                'name' => 'Handbag',
-//                'quantity' => 1,
-//                'price' => 3000,
-//            ],
-//        ];
+            ->withId($request['application_id']);
 
         // Create a new application activation model.
         $applicationActivation = (new \Divido\MerchantSDK\Models\ApplicationActivation())
-            ->withAmount(18000)
-            ->withReference('Order 235509678096')
-            ->withComment('Order was delivered to the customer.')
-            ->withOrderItems($items)
-            ->withDeliveryMethod('delivery')
-            ->withTrackingNumber('988gbqj182836');
+            ->withAmount($request['amount'])
+            ->withReference('reference')
+            ->withComment('order was delivered to the customer')
+            ->withOrderItems($request['items'])
+            ->withDeliveryMethod($request['delivery_method'])
+            ->withTrackingNumber($request['tracking_number']);
 
         // Create a new activation for the application.
         $response = $this->_sdk->application_activations()->createApplicationActivation($application, $applicationActivation);
