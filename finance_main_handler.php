@@ -24,12 +24,12 @@ if(isset($_POST['action']) && $_POST['action'] == 'getCalculatorWidget' && $_POS
       $financeEnv = $financeApi->getFinanceEnv();
       error_log(MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR);
     $widgets['js'] = $finance->getJsKey();
-    $widgets['jsSrc'] = "https://cdn.divido.com/calculator/v2.1/production/js/template.'$financeEnv'.js";
+    $widgets['jsSrc'] = "https://cdn.divido.com/calculator/v2.1/production/js/template.$financeEnv.js";
     if(MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR == 'True') {
-      $widgets['calculator'] = '<div data-'.$financeEnv.'-widget data-'.$financeEnv.'-prefix="'.MODULE_PAYMENT_FINANCEPAYMENT_PREFIX.'" data-'.$financeEnv.'-suffix="'.MODULE_PAYMENT_FINANCEPAYMENT_SUFIX.'" data-'.$financeEnv.'-title-logo data-'.$financeEnv.'-amount="'.$price.'" data-'.$financeEnv.'-apply="true" data-'.$financeEnv.'-apply-label="Apply Now" data-'.$financeEnv.'-plans ="'.$plans.'"></div>';
+      $widgets['calculator'] = '<div data-'.$financeEnv.'-widget data-'.$financeEnv.'-prefix="'.MODULE_PAYMENT_FINANCEPAYMENT_PREFIX.'" data-'.$financeEnv.'-suffix="'.MODULE_PAYMENT_FINANCEPAYMENT_SUFIX.'" data-'.$financeEnv.'-amount="'.$price.'" data-'.$financeEnv.'-apply="true" data-'.$financeEnv.'-apply-label="Apply Now" data-'.$financeEnv.'-plans ="'.$plans.'"></div>';
     }
     if(MODULE_PAYMENT_FINANCEPAYMENT_WIDGET == 'True') {
-      $widgets['widget'] = '<div data-'.$financeEnv.'-widget data-'.$financeEnv.'-mode="popup" data-'.$financeEnv.'-prefix="'.MODULE_PAYMENT_FINANCEPAYMENT_PREFIX.'" data-'.$financeEnv.'-suffix="'.MODULE_PAYMENT_FINANCEPAYMENT_SUFIX.'" data-'.$financeEnv.'-title-logo data-'.$financeEnv.'-amount="'.$price.'" data-'.$financeEnv.'-apply="true" data-'.$financeEnv.'-apply-label="Apply Now" data-'.$financeEnv.'-plans ="'.$plans.'"></div>';
+      $widgets['widget'] = '<div data-'.$financeEnv.'-widget data-'.$financeEnv.'-mode="popup" data-'.$financeEnv.'-prefix="'.MODULE_PAYMENT_FINANCEPAYMENT_PREFIX.'" data-'.$financeEnv.'-suffix="'.MODULE_PAYMENT_FINANCEPAYMENT_SUFIX.'" data-'.$financeEnv.'-amount="'.$price.'" data-'.$financeEnv.'-apply="true" data-'.$financeEnv.'-apply-label="Apply Now" data-'.$financeEnv.'-plans ="'.$plans.'"></div>';
     }
   }
   die(json_encode($widgets));
