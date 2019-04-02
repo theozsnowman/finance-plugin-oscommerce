@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    console.log('product admin');
     var base_url = window.location.origin,href = window.location.href,regex = new RegExp(/(categories.php)(?=.*action=new_product)(?=.*pID=([0-9]+))/g),mat = regex.exec(href);
     var regex1 = new RegExp(/(orders.php)(?=.*action=edit)(?=.*oID=([0-9]+))/g),mat1 = regex1.exec(href);
     var regex2 = new RegExp(/(modules.php)(?=.*module=(financepayment))(?=.*action=(edit))(?=.*set=(payment))/g),mat2 = regex2.exec(href);
