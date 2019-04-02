@@ -25,6 +25,8 @@ function addHTML(id,url)
         		}
         		setTimeout(function(){
         			dividoKey = data.js;
+        			duologiKey = data.js;
+        			nordeaKey = data.js;
         			var script = document.createElement('script');
 					script.src = data.jsSrc;
 					document.head.appendChild(script);

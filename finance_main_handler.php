@@ -10,11 +10,15 @@ require('includes/application_top.php');
 require(DIR_WS_MODULES . 'payment/financepayment.php');
 require_once DIR_FS_CATALOG. 'includes/languages/english/modules/payment/financepayment.php';
 $finance = new financepayment();
+error_log('finance handler');
 if(isset($_POST['action']) && $_POST['action'] == 'getCalculatorWidget' && $_POST['products_id'] > 0) {
+    error_log('product id passed');
     $price = $finance->get_product_price((int)$_POST['products_id']);
   $plans = $finance->getSelectedPlansString((int)$_POST['products_id'],(int)$price);
   $widgets = array();
   if($plans != '') {
+      error_log('have plans');
+      error_log(MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR);
     $widgets['js'] = $finance->getJsKey();
     $widgets['jsSrc'] = "https://cdn.divido.com/calculator/v2.1/production/js/template.divido.js";
     if(MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR == 'True') {

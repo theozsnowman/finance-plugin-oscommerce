@@ -6,6 +6,8 @@
  * Time: 11:33
  */
 
+use \GuzzleHttp\Client as Guzzle;
+
 class FinanceApi
 {
     private $_sdk;
@@ -52,6 +54,8 @@ class FinanceApi
      * @return mixed
      */
     public function createAnApplication($request_data){
+
+        error_log($request_data['response_url']);
 
         // Create an appication model with the application data.
         $application = (new \Divido\MerchantSDK\Models\Application())
@@ -142,6 +146,41 @@ class FinanceApi
     }
 
     function keys(){
+
+    }
+
+    public function getFinanceEnv(){
+
+        // set api key variable
+        if(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY === "MODULE_PAYMENT_FINANCEPAYMENT_APIKEY"){
+            $api_key = '';
+        }
+        else{
+            $api_key = MODULE_PAYMENT_FINANCEPAYMENT_APIKEY;
+        }
+
+        if (!$api_key) {
+            return array();
+        }
+
+        $client = new Guzzle;
+        $env = $this->environments($api_key);
+
+        $httpClientWrapper = new \Divido\MerchantSDK\HttpClient\HttpClientWrapper(
+            new \Divido\MerchantSDKGuzzle6\GuzzleAdapter($client),
+            \Divido\MerchantSDK\Environment::CONFIGURATION[$env]['base_uri'],
+            $api_key
+        );
+
+        $sdk  = new \Divido\MerchantSDK\Client( $httpClientWrapper, $env );
+
+
+        $response = $sdk->platformEnvironments()->getPlatformEnvironment();
+        $finance_env = $response->getBody()->getContents();
+        $decoded =json_decode($finance_env);
+
+        return $decoded->data->environment;
+
 
     }
 

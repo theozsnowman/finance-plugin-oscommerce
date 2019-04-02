@@ -137,7 +137,16 @@ class financepayment {
         WHERE o.`orders_id` = "'.(int)$oID.'"
         AND transaction_id != ""'
         ));
-        error_log($order_status);
+
+        // get products for SDK
+        $items = array(
+            array(
+                'name'     => "Order id: ". $order_status['transaction_id'],
+                'quantity' => 1,
+                'price'    => (int)((float)(substr($order->info['total'], 1)) * 100),
+            ),
+        );
+
         if ($order_status['payment_method'] != $this->title || $order_status['orders_status'] == $order_status['order_status_id']) {
             return;
         }
@@ -145,29 +154,19 @@ class financepayment {
 
             $request_data = array(
                 'application_id' => $order_status['transaction_id'],
-                'amount' => $order->info['total'],
-                'items' => $order->products,
+                'amount' => (int)((float)(substr($order->info['total'], 1)) * 100),
+                'items' => $items,
                 'delivery_method' => $order->info['shipping_method'],
                 'tracking_number' => '1234',
             );
-
-            //   Divido::setMerchant(MODULE_PAYMENT_FINANCEPAYMENT_APIKEY);
-            //    $response = Divido_Activation::activate($request_data);
 
             error_log('ACTIVATE');
 
             $response = $this->financeApi->activateApplicationWithSDK($request_data);
             error_log($response);
-//        if (isset($response['status']) && $response['status'] == 'ok') {
-//            //update order status in finance_requests table
+
             tep_db_query('UPDATE finance_requests SET `order_status_id` = "'.MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATED_STATUS.'" WHERE `order_id` = '.(int)$oID);
-//            return true;
-//        }
-//        if (isset($response->error)) {
-//            $messageStack->add_session($response->error, 'caution');
-//        } else {
-//          $messageStack->add_session(MODULE_PAYMENT_FINANCEPAYMENT_TEXT_ACTIVATION_CALL_ERROR, 'caution');
-//        }
+
 
         }
     }
@@ -245,10 +244,13 @@ class financepayment {
             $selection = array('id' => $this->code,
                 'module' => $this->title);
         } else {
+            error_log('get finance env');
+            $financeEnv= $this->financeApi->getFinanceEnv();
+            error_log($financeEnv);
             $selection = array('id' => $this->code,
                 'module' => '<span class="financepayment_title">'.MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE.'</span><br>
                          <script>
-                         var dividoKey = "'.$this->getJsKey().'";
+                         var '.$financeEnv.'Key = "'.$this->getJsKey().'";
                          $(document).ready(function() {
                           $(\'input[name="payment"]\').on("click",function() {
                             showPop($(this));
@@ -259,9 +261,9 @@ class financepayment {
                          })
                          function showPop(ths){
                             if(ths.val() == "financepayment") {
-                              $("#divido-checkout").slideDown();
+                              $("#'.$financeEnv.'-checkout").slideDown();
                             } else {
-                              $("#divido-checkout").slideUp();
+                              $("#'.$financeEnv.'-checkout").slideUp();
                             }
                          }
                          function selectRowEffect(object, buttonSelect) {
@@ -287,9 +289,9 @@ class financepayment {
                           }
                          </script>
                          <input type="hidden" name="divido_total" value="'.$order->info["total"].'">
-                         <script type="text/javascript" src="https://cdn.divido.com/calculator/v2.1/production/js/template.divido.js"></script>
-                         <div id="divido-checkout" style="display:none;">
-    <div data-divido-widget data-divido-prefix="'.MODULE_PAYMENT_FINANCEPAYMENT_PREFIX.'" data-divido-suffix="'.MODULE_PAYMENT_FINANCEPAYMENT_SUFIX.'" data-divido-title-logo data-divido-amount="'.$order->info["total"].'" data-divido-apply="true" data-divido-apply-label="Apply Now" data-divido-plans = "'.$this->getCartPlans($order,true).'"></div></div>',
+                         <script type="text/javascript" src="https://cdn.divido.com/calculator/v2.1/production/js/template.'.$financeEnv.'.js"></script>
+                         <div id="'.$financeEnv.'-checkout" style="display:none;">
+    <div data-'.$financeEnv.'-widget data-'.$financeEnv.'-prefix="'.MODULE_PAYMENT_FINANCEPAYMENT_PREFIX.'" data-'.$financeEnv.'-suffix="'.MODULE_PAYMENT_FINANCEPAYMENT_SUFIX.'" data-'.$financeEnv.'-title-logo data-'.$financeEnv.'-amount="'.$order->info["total"].'" data-'.$financeEnv.'-apply="true" data-'.$financeEnv.'-apply-label="Apply Now" data-'.$financeEnv.'-plans = "'.$this->getCartPlans($order,true).'"></div></div>',
             );
         }
         return $selection;
@@ -578,7 +580,7 @@ class financepayment {
         if(!empty($res))
             return false;
         $awaiting_status_id = $this->awaitingStatusExists();
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) values ('Set Order Status', 'MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATED_STATUS', '2', 'Order status to make Finance Payment activation call', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) values ('Set Order Status', 'MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATED_STATUS', '4', 'Order status to make Finance Payment activation call', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
 
         //Calculator MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Enable/Disable activation call functionality', 'MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL', 'False', 'Use Finance activation call functionality', '6', 'False', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
