@@ -129,7 +129,7 @@ class financepayment {
         if(MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL != 'True') {
             return false;
         }
-        //require(DIR_WS_CLASSES . 'order.php');
+        require(DIR_WS_CLASSES . 'order.php');
         $order = new order((int)$oID);
         $order_status = tep_db_fetch_array(tep_db_query(
             'SELECT o.`orders_status`,o.`payment_method`,fr.`order_status_id`,fr.`transaction_id` FROM `orders` o
@@ -476,25 +476,6 @@ class financepayment {
                 'message' => $e->getMessage()
             );
         }
-//   // $response = Divido_CreditRequest::create($request_data);
-//      if ($response->status == 'ok') {
-//        $_SESSION['order_id'] = $order_id;
-//        $this->saveHash($cart_id,$hash,$sub_total,$order_id,$response->id);
-//        unset($_SESSION['cartID']);
-//        unset($_SESSION['cart']);
-//          $data = array(
-//              'status' => true,
-//              'url'    => $response->url,
-//          );
-//          $this->transaction_id = $response->id;
-//      } else {
-//          $data = array(
-//              'status'  => false,
-//              'message' => $response->error,
-//          );
-//      }
-//      return $data;
-//        return "";
     }
 
     public function saveHash($cart_id, $salt, $total,$order_id = '',$transaction_id = '')
