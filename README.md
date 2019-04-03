@@ -10,7 +10,10 @@ Installation of finance payment module
 
 5. Login into your admin page. While viewing the payment modules in admin you will see the "Finance Payment" module in the list. Click the **[Install]** button.
 
-6. You can set the configuration of this module in the Modules => Payment => Finance Payment.
+6. You can set the configuration of this module in the Modules => Payment => Finance Payment:
+
+    a) add the api key
+    b) Under "Set Order Status" set to "Delivered"
 
 7.To add options of finance plans for each product page, You have to edit few files.
 
@@ -31,7 +34,6 @@ Installation of finance payment module
     <script type="text/javascript" src="<?php echo '../includes/modules/payment/financepayment/js/product_admin.js';?>">       </script>
 <!--eof Finance payment module js-->
 ```
-   
    
    c) You need to open the product_info.php in the root directory of the oscommerce folder and add the below code at the bottom of the file.
    
