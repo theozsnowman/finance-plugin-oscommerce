@@ -9,6 +9,8 @@
 require('includes/application_top.php');
 require(DIR_WS_MODULES . 'payment/financepayment.php');
 require_once DIR_FS_CATALOG. 'includes/languages/english/modules/payment/financepayment.php';
+require_once DIR_FS_CATALOG. 'includes/languages/english/modules/payment/FinanceApi.php';
+
 $finance = new financepayment();
 error_log('finance handler');
 if(isset($_POST['action']) && $_POST['action'] == 'getCalculatorWidget' && $_POST['products_id'] > 0) {
@@ -18,14 +20,16 @@ if(isset($_POST['action']) && $_POST['action'] == 'getCalculatorWidget' && $_POS
   $widgets = array();
   if($plans != '') {
       error_log('have plans');
+      $financeApi = new FinanceApi();
+      $financeEnv = $financeApi->getFinanceEnv();
       error_log(MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR);
     $widgets['js'] = $finance->getJsKey();
-    $widgets['jsSrc'] = "https://cdn.divido.com/calculator/v2.1/production/js/template.divido.js";
+    $widgets['jsSrc'] = "https://cdn.divido.com/calculator/v2.1/production/js/template.$financeEnv.js";
     if(MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR == 'True') {
-      $widgets['calculator'] = '<div data-divido-widget data-divido-prefix="'.MODULE_PAYMENT_FINANCEPAYMENT_PREFIX.'" data-divido-suffix="'.MODULE_PAYMENT_FINANCEPAYMENT_SUFIX.'" data-divido-title-logo data-divido-amount="'.$price.'" data-divido-apply="true" data-divido-apply-label="Apply Now" data-divido-plans ="'.$plans.'"></div>';
+      $widgets['calculator'] = '<div data-'.$financeEnv.'-widget data-'.$financeEnv.'-prefix="'.MODULE_PAYMENT_FINANCEPAYMENT_PREFIX.'" data-'.$financeEnv.'-suffix="'.MODULE_PAYMENT_FINANCEPAYMENT_SUFIX.'" data-'.$financeEnv.'-amount="'.$price.'" data-'.$financeEnv.'-apply="true" data-'.$financeEnv.'-apply-label="Apply Now" data-'.$financeEnv.'-plans ="'.$plans.'"></div>';
     }
     if(MODULE_PAYMENT_FINANCEPAYMENT_WIDGET == 'True') {
-      $widgets['widget'] = '<div data-divido-widget data-divido-mode="popup" data-divido-prefix="'.MODULE_PAYMENT_FINANCEPAYMENT_PREFIX.'" data-divido-suffix="'.MODULE_PAYMENT_FINANCEPAYMENT_SUFIX.'" data-divido-title-logo data-divido-amount="'.$price.'" data-divido-apply="true" data-divido-apply-label="Apply Now" data-divido-plans ="'.$plans.'"></div>';
+      $widgets['widget'] = '<div data-'.$financeEnv.'-widget data-'.$financeEnv.'-mode="popup" data-'.$financeEnv.'-prefix="'.MODULE_PAYMENT_FINANCEPAYMENT_PREFIX.'" data-'.$financeEnv.'-suffix="'.MODULE_PAYMENT_FINANCEPAYMENT_SUFIX.'" data-'.$financeEnv.'-amount="'.$price.'" data-'.$financeEnv.'-apply="true" data-'.$financeEnv.'-apply-label="Apply Now" data-'.$financeEnv.'-plans ="'.$plans.'"></div>';
     }
   }
   die(json_encode($widgets));
