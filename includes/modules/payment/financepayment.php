@@ -124,7 +124,6 @@ class financepayment {
     function CheckFinanceActiveCall($oID)
     {
 
-        error_log("change order id". $oID);
         global $messageStack;
         if(MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL != 'True') {
             return false;
@@ -160,10 +159,8 @@ class financepayment {
                 'tracking_number' => '1234',
             );
 
-            error_log('ACTIVATE');
-
-            $response = $this->financeApi->activateApplicationWithSDK($request_data);
-            error_log($response);
+            // use new sdk to make application request
+            $this->financeApi->activateApplicationWithSDK($request_data);
 
             tep_db_query('UPDATE finance_requests SET `order_status_id` = "'.MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATED_STATUS.'" WHERE `order_id` = '.(int)$oID);
 
@@ -244,9 +241,9 @@ class financepayment {
             $selection = array('id' => $this->code,
                 'module' => $this->title);
         } else {
-            error_log('get finance env');
+
             $financeEnv= $this->financeApi->getFinanceEnv();
-            error_log($financeEnv);
+
             $selection = array('id' => $this->code,
                 'module' => '<span class="financepayment_title">'.MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE.'</span><br>
                          <script>
@@ -688,8 +685,7 @@ class financepayment {
 
     function updateOrderStatus($order_id,$new_order_status,$status_comment = null,$trans_id = null)
     {
-        error_log('change order');
-//     die();
+
         if(!$order_id > 0 || !$new_order_status > 0)
             return false;
         $sql_data_array = array('orders_id' => $order_id,
