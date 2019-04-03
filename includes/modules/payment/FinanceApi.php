@@ -55,8 +55,6 @@ class FinanceApi
      */
     public function createAnApplication($request_data){
 
-        error_log($request_data['response_url']);
-
         // Create an appication model with the application data.
         $application = (new \Divido\MerchantSDK\Models\Application())
             ->withCountryId($request_data['country'])
