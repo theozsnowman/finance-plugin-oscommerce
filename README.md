@@ -13,6 +13,7 @@ Installation of finance payment module
 6. You can set the configuration of this module in the Modules => Payment => Finance Payment:
 
     a) add the api key
+    b) set "Enable/Disable activation call functionality" to "True"
     b) Under "Set Order Status" set to "Delivered"
 
 7.To add options of finance plans for each product page, You have to edit few files.
