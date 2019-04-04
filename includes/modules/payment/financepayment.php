@@ -14,7 +14,8 @@
 require_once DIR_FS_CATALOG. 'includes/languages/english/modules/payment/financepayment.php';
 require_once __DIR__. '/../../../vendor/autoload.php';
 require_once __DIR__. '/FinanceApi.php';
-
+require(DIR_WS_CLASSES . 'order.php');
+0
 
 
 class financepayment {
@@ -127,7 +128,7 @@ class financepayment {
         if(MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL != 'True') {
             return false;
         }
-        require(DIR_WS_CLASSES . 'order.php');
+
         $order = new order((int)$oID);
         $order_status = tep_db_fetch_array(tep_db_query(
             'SELECT o.`orders_status`,o.`payment_method`,fr.`order_status_id`,fr.`transaction_id` FROM `orders` o
