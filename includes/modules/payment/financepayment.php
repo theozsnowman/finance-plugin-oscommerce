@@ -17,6 +17,7 @@ require_once __DIR__. '/FinanceApi.php';
 
 
 
+
 class financepayment {
     /**
      * $code determines the internal 'code' name used to designate "this" payment module
@@ -127,7 +128,7 @@ class financepayment {
         if(MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL != 'True') {
             return false;
         }
-        require(DIR_WS_CLASSES . 'order.php');
+
         $order = new order((int)$oID);
         $order_status = tep_db_fetch_array(tep_db_query(
             'SELECT o.`orders_status`,o.`payment_method`,fr.`order_status_id`,fr.`transaction_id` FROM `orders` o
@@ -376,7 +377,6 @@ class financepayment {
         $finance = $_SESSION['finance_plan'];
         $cart = $_SESSION['cart'];
         $customer = $order->customer;
-        $address = $order->billing;
         $country = $order->billing['country']['iso_code_2'];
 
         $language = $_SESSION['languages_code'];
@@ -388,14 +388,16 @@ class financepayment {
         $lastName = $customer['lastname'];
         $email = $customer['email_address'];
         $telephone = $customer['telephone'];
-
+        $address = array([
+            'text' => $customer['street_address']. " " . $customer['suburb'] . " " . $customer['suburb'] . " " .$customer['city']. " " .$customer['postcode']
+        ]);
 
         $products  = array();
         foreach ($order->products as $product) {
             $products[] = array(
                 //     'type' => 'product',
                 'name' => $product['name'],
-                'quantity' => $product['qty'],
+                'quantity' => (int)$product['qty'],
                 'price'  => (int)$product['final_price'] * 100,
             );
         }
@@ -448,6 +450,7 @@ class financepayment {
                 'lastName'     => $lastName,
                 'email'         => $email,
                 'phoneNumber'  => $telephone,
+                'addresses' => $address
             ),
             'products' => $products,
             'response_url' => htmlspecialchars_decode($response_url),

@@ -10,6 +10,7 @@ require('includes/application_top.php');
 require(DIR_WS_MODULES . 'payment/financepayment.php');
 require_once DIR_FS_CATALOG. 'includes/languages/english/modules/payment/financepayment.php';
 require_once DIR_FS_CATALOG. 'includes/languages/english/modules/payment/FinanceApi.php';
+require(DIR_WS_CLASSES . 'order.php');
 
 $finance = new financepayment();
 
