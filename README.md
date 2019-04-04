@@ -2,23 +2,23 @@
 Installation of finance payment module    
 --------------------------------------
 
-1. Move `finance-gateway-oscommerce.zip` to the "catalog" directory of oscommerce site on client server
+1. Move `finance-gateway-oscommerce.zip` to the "catalog" directory of the oscommerce site on the client server
 
-2. ssh into client server and navigate to the "catalog" directory of oscommerce site
+2. ssh into the client server and navigate to the "catalog" directory of the oscommerce site
 
 3. Run `unzip finance-gateway-oscommerce.zip`
 
-5. Login into your admin page. While viewing the payment modules in admin you will see the "Finance Payment" module in the list. Click the **[Install]** button.
+5. Login to your admin page. While viewing the payment modules in admin you will see the "Finance Payment" module in the list. Click the **[Install]** button.
 
 6. You can set the configuration of this module in the Modules => Payment => Finance Payment:
 
-    a) add the api key
-    b) set "Enable/Disable activation call functionality" to "True"
-    b) Under "Set Order Status" set to "Delivered"
+    a) Add your api key
+    b) Set "Enable/Disable activation call functionality" to "True"
+    b) Under "Set Order Status - Order status to make Finance Payment activation call", set to "Delivered"
 
-7.To add options of finance plans for each product page, You have to edit few files.
+6. To add options of finance plans for each product page, You have to edit few files.
 
-   a) You need to open /admin/includes/application_bottom.php and add the below code at the bottom of the file.
+   a) Open /admin/includes/application_bottom.php and add the below code at the bottom of the file.
    
  ```  
 <!--bof Finance payment module js-->
@@ -27,7 +27,7 @@ Installation of finance payment module
 ```
 
 
-   b) Add this snippet to the bottom of /admin/orders.php
+   b) Open /admin/orders.php and add the below code at the bottom of the file.
    
    
  ```  
@@ -36,7 +36,7 @@ Installation of finance payment module
 <!--eof Finance payment module js-->
 ```
    
-   c) You need to open the product_info.php in the root directory of the oscommerce folder and add the below code at the bottom of the file.
+   c) Open product_info.php in the root directory add the below code at the bottom of the file.
    
 ```
 <!--bof Finance payment module js-->
