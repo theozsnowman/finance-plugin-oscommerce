@@ -14,7 +14,7 @@ Installation of finance payment module
 
 6. To add options of finance plans for each product page, You have to edit few files.
 
-   a) Open /admin/includes/application_bottom.php and add the below code at the bottom of the file.
+   a) Open ```/admin/includes/application_bottom.php``` and add the below code at the bottom of the file.
    
  ```  
 <!--bof Finance payment module js-->
@@ -22,7 +22,7 @@ Installation of finance payment module
 <!--eof Finance payment module js-->
 ```
    
-   b) Open product_info.php in the root directory add the below code at the bottom of the file.
+   b) Open ```product_info.php``` in the root directory add the below code at the bottom of the file.
    
 ```
 <!--bof Finance payment module js-->
@@ -30,7 +30,7 @@ Installation of finance payment module
 <!--eof Finance payment module js-->
 ```    
 
-7. To send an activation call to Divido you need to open /admin/orders.php and add the below code at the bottom of the file.
+7. To send an activation call to Divido you need to open ```/admin/orders.php``` and add the below code at the bottom of the file.
    
  ```  
 <!--bof Finance payment module js-->
