@@ -35,7 +35,7 @@ Installation of finance payment module
 <!--eof Finance payment module js-->
 ```    
 
-6. To send an activation call to Divido you need to open /admin/orders.php and add the below code at the bottom of the file.
+7. To send an activation call to Divido you need to open /admin/orders.php and add the below code at the bottom of the file.
    
  ```  
 <!--bof Finance payment module js-->
