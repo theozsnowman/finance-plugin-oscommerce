@@ -8,13 +8,9 @@ Installation of finance payment module
 
 3. Run `unzip finance-gateway-oscommerce.zip`
 
-5. Login to your admin page. While viewing the payment modules in admin you will see the "Finance Payment" module in the list. Click the **[Install]** button.
+4. Login to your admin page. While viewing the payment modules in admin you will see the "Finance Payment" module in the list. Click the **[Install]** button.
 
-6. You can set the configuration of this module in the Modules => Payment => Finance Payment:
-
-    a) Add your api key
-    b) Set "Enable/Disable activation call functionality" to "True"
-    b) Under "Set Order Status - Order status to make Finance Payment activation call", set to "Delivered"
+5. Set the configuration of this module by in <b>Modules > Payment > Finance Payment</b>
 
 6. To add options of finance plans for each product page, You have to edit few files.
 
@@ -25,7 +21,6 @@ Installation of finance payment module
     <script type="text/javascript" src="<?php echo '../includes/modules/payment/financepayment/js/product_admin.js';?>">       </script>
 <!--eof Finance payment module js-->
 ```
-
    
    b) Open product_info.php in the root directory add the below code at the bottom of the file.
    
@@ -42,3 +37,10 @@ Installation of finance payment module
     <script type="text/javascript" src="<?php echo '../includes/modules/payment/financepayment/js/product_admin.js';?>">       </script>
 <!--eof Finance payment module js-->
 ```
+
+
+
+Usage guide   
+-----------
+
+http://integrations.divido.com/oscommerce/
