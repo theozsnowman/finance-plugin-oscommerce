@@ -65,7 +65,7 @@ class FinanceApi
                 $request_data['customer']
             ])
             ->withOrderItems($request_data['products'])
-            ->withDepositPercentage($request_data['deposit_percentage'])
+            ->withDepositAmount($request_data['deposit_amount'])
             ->withFinalisationRequired( false )
             ->withMerchantReference('')
             ->withUrls([

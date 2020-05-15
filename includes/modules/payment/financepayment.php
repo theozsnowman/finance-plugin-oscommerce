@@ -423,8 +423,6 @@ class financepayment {
             'price'    => $disounts,
         );
 
-        $deposit_amount = tep_round(($deposit / 100) * $sub_total-$disounts, 2);
-
         $response_url = tep_href_link('finance_main_handler.php', 'type=financepayment&response=1', 'SSL', true,true, true);
         $redirect_url = tep_href_link('finance_main_handler.php', 'type=financepayment&confirmation=1&cartID='.$cart_id, 'SSL', true,true, true);
         $checkout_url = tep_href_link(FILENAME_CHECKOUT_PAYMENT, '', 'SSL', true, false);
@@ -437,8 +435,7 @@ class financepayment {
 
         $request_data = array(
             'merchant' => MODULE_PAYMENT_FINANCEPAYMENT_APIKEY,
-            'deposit_amount'  => $deposit_amount,
-            'deposit_percentage' => ((float) $deposit)/100 ,
+            'deposit_amount'  => round($deposit),
             'finance'  => $finance,
             'country'  => $country,
             'language' => $language,
