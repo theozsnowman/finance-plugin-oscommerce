@@ -243,7 +243,8 @@ class financepayment {
         } else {
 
             $financeEnv= $this->financeApi->getFinanceEnv();
-
+            $apiKey = $this->getJsKey();
+            $widgetAmount = round($order->info["total"] * 100);
             $selection = array('id' => $this->code,
                 'module' => '<span class="financepayment_title">'.MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE.'</span><br>
                          <script>
@@ -286,9 +287,10 @@ class financepayment {
                           }
                          </script>
                          <input type="hidden" name="divido_total" value="'.$order->info["total"].'">
-                         <script type="text/javascript" src="https://cdn.divido.com/calculator/v2.1/production/js/template.'.$financeEnv.'.js"></script>
                          <div id="'.$financeEnv.'-checkout" style="display:none;">
-    <div data-'.$financeEnv.'-widget data-'.$financeEnv.'-prefix="'.MODULE_PAYMENT_FINANCEPAYMENT_PREFIX.'" data-'.$financeEnv.'-suffix="'.MODULE_PAYMENT_FINANCEPAYMENT_SUFIX.'" data-'.$financeEnv.'-title-logo data-'.$financeEnv.'-amount="'.$order->info["total"].'" data-'.$financeEnv.'-apply="true" data-'.$financeEnv.'-apply-label="Apply Now" data-'.$financeEnv.'-plans = "'.$this->getCartPlans($order,true).'"></div></div>',
+    <div data-calculator-widget data-mode="calculator" data-api-key="'.$apiKey.'" data-amount="'.$widgetAmount.'" data-plans="'.$this->getCartPlans($order,true).'"></div></div>
+    <script type="text/javascript" src="https://cdn.divido.com/widget/v3/'.$financeEnv.'.calculator.js"></script>
+    ',
             );
         }
         return $selection;
