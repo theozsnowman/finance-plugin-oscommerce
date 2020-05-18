@@ -400,14 +400,14 @@ class financepayment {
                 //     'type' => 'product',
                 'name' => $product['name'],
                 'quantity' => (int)$product['qty'],
-                'price'  => (int)$product['final_price'] * 100,
+                'price'  => round($product['final_price'] * 100),
             );
         }
 
         $sub_total = $_SESSION['finance_total'];
 
-        $shiphandle = (int)$order->info['shipping_cost'] * 100;
-        $disounts = -(int)$_SESSION['total_discount'] * 100;
+        $shiphandle = round($order->info['shipping_cost'] * 100);
+        $disounts = -round($_SESSION['total_discount'] * 100);
 
 
         $products[] = array(
@@ -577,7 +577,7 @@ class financepayment {
 
         //Calculator MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Calculator on product page', 'MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR', 'False', 'Show Finance payment calculator on product page', '6', '0', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
-        
+
         //Require whole cart MODULE_PAYMENT_FINANCEPAYMENT_WHOLE_CART
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Require whole cart to be available on finance', 'MODULE_PAYMENT_FINANCEPAYMENT_WHOLE_CART', 'False', 'Require whole cart to be available on finance', '6', '0', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
 
