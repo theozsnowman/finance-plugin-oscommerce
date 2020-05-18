@@ -44,3 +44,12 @@ Usage guide
 -----------
 
 http://integrations.divido.com/oscommerce/
+
+
+ == Changelog ==
+Version 1.2
+Fix - Round to nearest penny
+
+Version 1.1
+Add new calculator widget
+Remove suffix and prefix plugin settings
