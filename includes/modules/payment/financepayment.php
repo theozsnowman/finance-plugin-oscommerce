@@ -562,21 +562,21 @@ class financepayment {
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) values ('Set Order Status', 'MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATED_STATUS', '3', 'Order status to make Finance Payment activation call', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
 
         //Calculator MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Enable/Disable activation call functionality', 'MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL', 'False', 'Use Finance activation call functionality', '6', 'False', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Enable/Disable activation call functionality', 'MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL', 'True', 'Use Finance activation call functionality', '6', 'False', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
 
         //payment title MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Finance Payment module\'s title', 'MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE', 'Pay in instalments', 'The Title used for the Finance payment service', '6', '0', now())");
 
         //Finance plan MODULE_PAYMENT_FINANCEPAYMENT_PLAN
         foreach ($plans as $key => $value) {
-            tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Finance plan', 'MODULE_PAYMENT_FINANCEPAYMENT_PLAN_".$key."', 'False', '".$value."', '6', '0','tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
+            tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Finance plan', 'MODULE_PAYMENT_FINANCEPAYMENT_PLAN_".$key."', 'True', '".$value."', '6', '0','tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
         }
 
         //Widget on product page MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_WIDGET
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Widget on product page', 'MODULE_PAYMENT_FINANCEPAYMENT_WIDGET', 'True', 'Show Finance payment widget on product page', '6', '0', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
 
         //Calculator MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Calculator on product page', 'MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR', 'False', 'Show Finance payment calculator on product page', '6', '0', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Calculator on product page', 'MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR', 'True', 'Show Finance payment calculator on product page', '6', '0', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
 
         //Require whole cart MODULE_PAYMENT_FINANCEPAYMENT_WHOLE_CART
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Require whole cart to be available on finance', 'MODULE_PAYMENT_FINANCEPAYMENT_WHOLE_CART', 'False', 'Require whole cart to be available on finance', '6', '0', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
