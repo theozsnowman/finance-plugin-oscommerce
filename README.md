@@ -51,6 +51,7 @@ Version 1.2
 Fix - Round to nearest penny
 Rename default Finance Payment module's title to "Pay in instalments"
 Rename plugin name to "Powered by Divido"
+Set default order status for activation to "Delivered"
 
 Version 1.1
 Add new calculator widget

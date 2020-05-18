@@ -559,7 +559,7 @@ class financepayment {
         if(!empty($res))
             return false;
         $awaiting_status_id = $this->awaitingStatusExists();
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) values ('Set Order Status', 'MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATED_STATUS', '4', 'Order status to make Finance Payment activation call', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) values ('Set Order Status', 'MODULE_PAYMENT_FINANCEPAYMENT_ACTIVATED_STATUS', '3', 'Order status to make Finance Payment activation call', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
 
         //Calculator MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Enable/Disable activation call functionality', 'MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL', 'False', 'Use Finance activation call functionality', '6', 'False', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
