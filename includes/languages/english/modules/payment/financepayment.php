@@ -9,8 +9,8 @@
  * @version $Id: Author: DrByte  Wed Dec 30 22:16:19 2015 -0500 Modified in v1.5.5 $
  */
 
-  define('MODULE_PAYMENT_FINANCEPAYMENT_TEXT_ADMIN_TITLE', 'Finance payment');
-  define('MODULE_PAYMENT_FINANCEPAYMENT_TEXT_CATALOG_TITLE', 'Finance payment');  // Payment option title as displayed to the customer
+  define('MODULE_PAYMENT_FINANCEPAYMENT_TEXT_ADMIN_TITLE', 'Powered by Divido');
+  define('MODULE_PAYMENT_FINANCEPAYMENT_TEXT_CATALOG_TITLE', 'Powered by Divido');  // Payment option title as displayed to the customer
 
 
   if (MODULE_PAYMENT_FINANCEPAYMENT_STATUS == 'True') {

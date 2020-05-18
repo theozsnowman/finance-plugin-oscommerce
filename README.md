@@ -50,6 +50,7 @@ http://integrations.divido.com/oscommerce/
 Version 1.2
 Fix - Round to nearest penny
 Rename default Finance Payment module's title to "Pay in instalments"
+Rename plugin name to "Powered by Divido"
 
 Version 1.1
 Add new calculator widget
