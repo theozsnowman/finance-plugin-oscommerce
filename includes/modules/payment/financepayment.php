@@ -565,7 +565,7 @@ class financepayment {
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order,set_function, date_added) values ('Enable/Disable activation call functionality', 'MODULE_PAYMENT_FINANCEPAYMENT_USE_ACTIVATIONCALL', 'False', 'Use Finance activation call functionality', '6', 'False', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
 
         //payment title MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Finance Payment module\'s title', 'MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE', 'Finance module', 'The Title used for the Finance payment service', '6', '0', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Finance Payment module\'s title', 'MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE', 'Pay in instalments', 'The Title used for the Finance payment service', '6', '0', now())");
 
         //Finance plan MODULE_PAYMENT_FINANCEPAYMENT_PLAN
         foreach ($plans as $key => $value) {
