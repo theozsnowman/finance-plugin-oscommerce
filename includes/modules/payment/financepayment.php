@@ -243,7 +243,8 @@ class financepayment {
         } else {
 
             $financeEnv= $this->financeApi->getFinanceEnv();
-
+            $apiKey = $this->getJsKey();
+            $widgetAmount = round($order->info["total"] * 100);
             $selection = array('id' => $this->code,
                 'module' => '<span class="financepayment_title">'.MODULE_PAYMENT_FINANCEPAYMENT_PAYMENT_TITLE.'</span><br>
                          <script>
@@ -286,9 +287,10 @@ class financepayment {
                           }
                          </script>
                          <input type="hidden" name="divido_total" value="'.$order->info["total"].'">
-                         <script type="text/javascript" src="https://cdn.divido.com/calculator/v2.1/production/js/template.'.$financeEnv.'.js"></script>
                          <div id="'.$financeEnv.'-checkout" style="display:none;">
-    <div data-'.$financeEnv.'-widget data-'.$financeEnv.'-prefix="'.MODULE_PAYMENT_FINANCEPAYMENT_PREFIX.'" data-'.$financeEnv.'-suffix="'.MODULE_PAYMENT_FINANCEPAYMENT_SUFIX.'" data-'.$financeEnv.'-title-logo data-'.$financeEnv.'-amount="'.$order->info["total"].'" data-'.$financeEnv.'-apply="true" data-'.$financeEnv.'-apply-label="Apply Now" data-'.$financeEnv.'-plans = "'.$this->getCartPlans($order,true).'"></div></div>',
+    <div data-calculator-widget data-mode="calculator" data-api-key="'.$apiKey.'" data-amount="'.$widgetAmount.'" data-plans="'.$this->getCartPlans($order,true).'"></div></div>
+    <script type="text/javascript" src="https://cdn.divido.com/widget/v3/'.$financeEnv.'.calculator.js"></script>
+    ',
             );
         }
         return $selection;
@@ -421,8 +423,6 @@ class financepayment {
             'price'    => $disounts,
         );
 
-        $deposit_amount = tep_round(($deposit / 100) * $sub_total-$disounts, 2);
-
         $response_url = tep_href_link('finance_main_handler.php', 'type=financepayment&response=1', 'SSL', true,true, true);
         $redirect_url = tep_href_link('finance_main_handler.php', 'type=financepayment&confirmation=1&cartID='.$cart_id, 'SSL', true,true, true);
         $checkout_url = tep_href_link(FILENAME_CHECKOUT_PAYMENT, '', 'SSL', true, false);
@@ -435,8 +435,7 @@ class financepayment {
 
         $request_data = array(
             'merchant' => MODULE_PAYMENT_FINANCEPAYMENT_APIKEY,
-            'deposit_amount'  => $deposit_amount,
-            'deposit_percentage' => ((float) $deposit)/100 ,
+            'deposit_amount'  => round($deposit),
             'finance'  => $finance,
             'country'  => $country,
             'language' => $language,

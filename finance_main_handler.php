@@ -23,12 +23,14 @@ if(isset($_POST['action']) && $_POST['action'] == 'getCalculatorWidget' && $_POS
       $financeApi = new FinanceApi();
       $financeEnv = $financeApi->getFinanceEnv();
     $widgets['js'] = $finance->getJsKey();
-    $widgets['jsSrc'] = "https://cdn.divido.com/calculator/v2.1/production/js/template.$financeEnv.js";
+    $apiKey = $finance->getJsKey();
+    $widgets['jsSrc'] = "https://cdn.divido.com/widget/v3/$financeEnv.calculator.js";
+    $dataAmount = round($price * 100);
     if(MODULE_PAYMENT_FINANCEPAYMENT_PRODUCT_CALCULATOR == 'True') {
-      $widgets['calculator'] = '<div data-'.$financeEnv.'-widget data-'.$financeEnv.'-prefix="'.MODULE_PAYMENT_FINANCEPAYMENT_PREFIX.'" data-'.$financeEnv.'-suffix="'.MODULE_PAYMENT_FINANCEPAYMENT_SUFIX.'" data-'.$financeEnv.'-amount="'.$price.'" data-'.$financeEnv.'-apply="true" data-'.$financeEnv.'-apply-label="Apply Now" data-'.$financeEnv.'-plans ="'.$plans.'"></div>';
+      $widgets['calculator'] = '<div data-calculator-widget data-api-key="'.$apiKey.'" style="margin-bottom:12px;text-decoration:underline;" data-mode="calculator"  data-amount="'.$dataAmount.'" data-plans ="'.$plans.'"></div>';
     }
     if(MODULE_PAYMENT_FINANCEPAYMENT_WIDGET == 'True') {
-      $widgets['widget'] = '<div data-'.$financeEnv.'-widget data-'.$financeEnv.'-mode="popup" data-'.$financeEnv.'-prefix="'.MODULE_PAYMENT_FINANCEPAYMENT_PREFIX.'" data-'.$financeEnv.'-suffix="'.MODULE_PAYMENT_FINANCEPAYMENT_SUFIX.'" data-'.$financeEnv.'-amount="'.$price.'" data-'.$financeEnv.'-apply="true" data-'.$financeEnv.'-apply-label="Apply Now" data-'.$financeEnv.'-plans ="'.$plans.'"></div>';
+      $widgets['widget'] = '<div data-calculator-widget data-api-key="'.$apiKey.'" style="margin-bottom:12px;text-decoration:underline;" data-mode="lightbox"  data-amount="'.$dataAmount.'" data-plans ="'.$plans.'"></div>';
     }
   }
   die(json_encode($widgets));
@@ -52,7 +54,7 @@ require(DIR_WS_CLASSES . 'payment.php');
 require_once(DIR_WS_CLASSES . 'shopping_cart.php');
 require(DIR_WS_CLASSES . 'order_total.php');
 global $order,$messageStack,$zco_notifier,$order_totals,$payment;
-if (isset($_GET['type']) && $_GET['type'] == 'financepayment' && isset($_GET['response'])) {  
+if (isset($_GET['type']) && $_GET['type'] == 'financepayment' && isset($_GET['response'])) {
   $input = file_get_contents('php://input');
   $data  =  json_decode($input);
   if (!isset($data->status) || !isset($data->metadata->cart_id)) {
@@ -121,4 +123,4 @@ if (isset($_GET['type']) && $_GET['type'] == 'financepayment' && isset($_GET['re
     }
     $order_total_modules = new order_total;
     $finance->sendOrderEmails($order_id);
-} 
+}
