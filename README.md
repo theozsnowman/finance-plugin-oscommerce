@@ -2,11 +2,11 @@
 Installation of finance payment module    
 --------------------------------------
 
-1. Move `finance-gateway-oscommerce.zip` to the "catalog" directory of the oscommerce site on the client server
+1. Move `powered-by-divido.zip` to the "catalog" directory of the oscommerce site on the client server
 
 2. ssh into the client server and navigate to the "catalog" directory of the oscommerce site
 
-3. Run `unzip finance-gateway-oscommerce.zip`
+3. Run `unzip powered-by-divido.zip`
 
 4. Login to your admin page. While viewing the payment modules in admin you will see the "Finance Payment" module in the list. Click the **[Install]** button.
 
@@ -48,11 +48,12 @@ http://integrations.divido.com/oscommerce/
 
  == Changelog ==
 Version 1.2
-Fix - Round to nearest penny
-Rename default Finance Payment module's title to "Pay in instalments"
-Rename plugin name to "Powered by Divido"
-Set default order status for activation to "Delivered"
+ - Fix - Round to nearest penny
+ - Rename default Finance Payment module's title to "Pay in instalments"
+ - Rename plugin name to "Powered by Divido"
+ - Set default order status for activation to "Delivered"
+ - Set most defaults to "true"
 
 Version 1.1
-Add new calculator widget
-Remove suffix and prefix plugin settings
+ - Add new calculator widget
+ - Remove suffix and prefix plugin settings
